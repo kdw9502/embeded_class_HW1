@@ -57,12 +57,34 @@ void reset_value(int mode)
     {
         case CLOCK_MODE:
             value_addr = malloc(sizeof(clock_values));
+            clock_values *a = (clock_values*)value_addr;
+            a->time = 0;
+            a->bonus_time = 0;
+
+            break;
         case COUNTER_MODE:
             value_addr = malloc(sizeof(counter_values));
+            counter_values *b = (counter_values*)value_addr;
+            b->exponent = 10;
+            b->value = 0;
+            break;
         case TEXT_MODE:
             value_addr = malloc(sizeof(text_editor_values));
+            text_editor_values *c = (text_editor_values*)value_addr;
+            c->count=0;
+            c->is_letter_mode=True;
+            c->length=0;
+            c->prev_value='';
+            c->string = (char*)malloc(sizeof(char*)*8);
+            c->string[0] = '\0';
+            break;
         case DRAW_MODE:
             value_addr = main(sizeof(draw_board_values));
+            draw_board_values *d = (draw_board_values*)value_addr;
+            d->count = 0;
+            d->board = (char*)malloc(sizeof(char*)*200);
+            d->cursor_point = 0;
+            break;
     }
     shmdt(mode_addr);
     shmdt(value_addr);
