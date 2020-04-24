@@ -1,46 +1,4 @@
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <linux/input.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <termios.h>
-#include <signal.h>
-#include <stdio.h>
-
-#include <sys/mman.h>
-
-#define BUFF_SIZE 64
-
-#define KEY_RELEASE 0
-#define KEY_PRESS 1
-
-#define BACK_KEY_CODE 158
-#define VOLUME_UP 115
-#define VOLUME_DOWN 114
-
-#define CLOCK_MODE 0
-#define COUNTER_MODE 1
-#define TEXT_MODE 2
-#define DRAW_MODE 3
-#define MODE_COUNT 4
-
-#define INPUT_SEQ 0
-#define MAIN_SEQ 1
-#define OUTPUT_SEQ 2
-
-#define DELAY 200000
-
-#define MAX_BUTTON 9
-
-int button_mid, mode_mid, value_mid;
+#include "main.h"
 
 void input_process() {
 
@@ -49,7 +7,6 @@ void input_process() {
         read_fpga_key(button_mid);
         usleep(DELAY);
     }
-    return 0;
 }
 
 void main_process() {
@@ -134,7 +91,7 @@ int main() {
     button_mid = shmget(IPC_PRIVATE, 50, IPC_CREAT | 0644);
     mode_mid = shmget(IPC_PRIVATE, 10, IPC_CREAT | 0644);
     value_mid = shmget(IPC_PRIVATE, 1000, IPC_CREAT | 0644);
-    if (button_mid == -1) {
+    if (button_mid == -1 || mode_mid == -1 || value_mid == -1) {
         perror("shmget");
         exit(1);
     }
