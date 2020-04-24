@@ -22,15 +22,6 @@
 #define KEY_RELEASE 0
 #define KEY_PRESS 1
 
-#define SW1 1
-#define SW2 2
-#define SW3 3
-#define SW4 4
-#define SW5 5
-#define SW6 6
-#define SW7 7
-#define SW8 8
-#define SW9 9
 #define BACK_KEY_CODE 158
 #define VOLUME_UP 115
 #define VOLUME_DOWN 114
@@ -49,8 +40,9 @@
 
 #define MAX_BUTTON 9
 
+int button_mid, mode_mid, value_mid;
 
-void input_process(int button_mid, int mode_mid) {
+void input_process() {
 
     while (1) {
         read_hw_key(mode_mid);
@@ -60,15 +52,12 @@ void input_process(int button_mid, int mode_mid) {
     return 0;
 }
 
-void main_process(int button_mid, int mode_mid) {
+void main_process() {
     while (1) {
         int *button_addr;
-        int *mode_addr, mode;
+        int *mode_addr;
         button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
-        mode = mode_addr[0];
-
-
 
         usleep(DELAY);
     }
@@ -76,15 +65,14 @@ void main_process(int button_mid, int mode_mid) {
 
 void output_process(int button_mid, int mode_mid) {
     int *button_addr;
-    int *mode_addr, mode;
+    int *mode_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
-    mode = mode_addr[0];
 }
 
 
 
-void read_hw_key(int mode_mid) {
+void read_hw_key() {
     char* device = "/dev/input/event0";
     int* mode;
     mode = (int*)shmat(mode_mid, (int*) NULL,0);
@@ -113,7 +101,7 @@ void read_hw_key(int mode_mid) {
     close(fd);
 }
 
-void read_fpga_key(int button_mid) {
+void read_fpga_key() {
     int i;
     int dev;
     int buff_size;
@@ -143,10 +131,9 @@ void clock() {
 }
 
 int main() {
-    int button_mid, i, mode_mid;
-
     button_mid = shmget(IPC_PRIVATE, 50, IPC_CREAT | 0644);
     mode_mid = shmget(IPC_PRIVATE, 10, IPC_CREAT | 0644);
+    value_mid = shmget(IPC_PRIVATE, 1000, IPC_CREAT | 0644);
     if (button_mid == -1) {
         perror("shmget");
         exit(1);
@@ -159,7 +146,7 @@ int main() {
             exit(1);
             break;
         case 0: // child
-            input_process(button_mid, mode_mid);
+            input_process();
             break;
         default: //parent
             switch (fork()) {
@@ -168,10 +155,10 @@ int main() {
                     exit(1);
                     break;
                 case 0: // child
-                    output_process(button_mid, mode_mid);
+                    output_process();
                     break;
                 default:
-                    main_process(button_mid, mode_mid);
+                    main_process();
             }
             break;
     }
