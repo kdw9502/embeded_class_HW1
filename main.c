@@ -15,9 +15,6 @@ void main_process() {
     mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
 
     while (1) {
-        int *button_addr;
-
-        button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
         if (mode_addr[0] > MODE_CHANGED)
@@ -43,10 +40,10 @@ void main_process() {
 }
 
 void output_process(int button_mid, int mode_mid) {
-    int *button_addr;
-    int *mode_addr;
-    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
-    mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
+//    int *button_addr;
+//    int *mode_addr;
+//    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
+//    mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 }
 
 void reset_value(int mode)
@@ -116,6 +113,9 @@ void read_hw_key() {
             }
         }
     }
+#ifdef DEBUG
+    printf("mode is %d", mode[0]);
+#endif
     close(fd);
 }
 
@@ -135,17 +135,47 @@ void read_fpga_key() {
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
     read(dev, &button_addr, buff_size);
-
+#ifdef
     for(i=0;i<MAX_BUTTON;i++) {
         printf("[%d] ",button_addr[i]);
     }
+#endif
     printf("\n");
     shmdt(button_addr);
     close(dev);
 }
 
 void clock() {
+    int *button_addr;
+    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
+    clock_values* clockValues;
+    clockValues = (clock_values *) shmat(value_mid, (clock_values*)NULL, 0);
 
+    if (button_addr[2] == 1)
+        clockValues->bonus_time = 0;
+
+    if (button_addr[3] == 1)
+        clockValues->bonus_time += 3600;
+
+    if (button_addr[4] == 1)
+        clockValues->bonus_time += 60;
+
+    char command[30];
+    sprintf(command, "date -d \"+%s hours\" \"+%s min\"");
+    if (button_addr[1] == 1)
+        system(command);
+
+}
+
+void clock_output()
+{
+    clock_values* clockValues;
+    clockValues = (clock_values *) shmat(value_mid, (clock_values*)NULL, 0);
+    time_t now;
+    now = time(NULL) + clockValues->bonus_time;
+
+    int hour = now / 3600 % 24;
+    int min = now % 60;
 }
 
 int main() {
