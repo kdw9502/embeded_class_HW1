@@ -10,11 +10,33 @@ void input_process() {
 }
 
 void main_process() {
+    int *mode_addr;
+    mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
+    mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
+
     while (1) {
         int *button_addr;
-        int *mode_addr;
+
         button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
+
+        if (mode_addr[0] > MODE_CHANGED)
+        {
+            mode_addr[0] -= MODE_CHANGED;
+            reset_value(mode_addr[0]);
+        }
+
+        switch (mode_addr[0])
+        {
+            case CLOCK_MODE:
+                clock();
+            case COUNTER_MODE:
+                counter();
+            case TEXT_MODE:
+                text_editor();
+            case DRAW_MODE:
+                draw_board();
+        }
 
         usleep(DELAY);
     }
@@ -27,7 +49,24 @@ void output_process(int button_mid, int mode_mid) {
     mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 }
 
-
+void reset_value(int mode)
+{
+    int *mode_addr = (int char *) shmat(mode_mid, (unsigned char *) NULL, 0);
+    void* value_addr = (void*) shmat(value_mid, (void*) NULL,0);
+    switch (mode)
+    {
+        case CLOCK_MODE:
+            value_addr = malloc(sizeof(clock_values));
+        case COUNTER_MODE:
+            value_addr = malloc(sizeof(counter_values));
+        case TEXT_MODE:
+            value_addr = malloc(sizeof(text_editor_values));
+        case DRAW_MODE:
+            value_addr = main(sizeof(draw_board_values));
+    }
+    shmdt(mode_addr);
+    shmdt(value_addr);
+}
 
 void read_hw_key() {
     char* device = "/dev/input/event0";
@@ -49,9 +88,9 @@ void read_hw_key() {
             exit(0);
         } else {
             if (code == VOLUME_UP) {
-                mode[0] = mode[0] + 1 % MODE_COUNT;
+                mode[0] = mode[0] + 1 % MODE_COUNT + MODE_CHANGED;
             } else if (code == VOLUME_DOWN) {
-                mode[0] = mode[0] + MODE_COUNT - 1 % MODE_COUNT;
+                mode[0] = mode[0] + MODE_COUNT - 1 % MODE_COUNT + MODE_CHANGED;
             }
         }
     }

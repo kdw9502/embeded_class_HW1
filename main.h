@@ -4,6 +4,7 @@
 
 #ifndef EMBEDDED_MAIN_H
 #define EMBEDDED_MAIN_H
+
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -20,9 +21,11 @@
 #include <termios.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <sys/mman.h>
 #include "main.h"
+
 #define BUFF_SIZE 64
 
 #define KEY_RELEASE 0
@@ -47,7 +50,9 @@
 #define MAX_BUTTON 9
 
 #define False 0
-#defint True 1
+#define True 1
+
+#define MODE_CHANGED 10
 
 int button_mid, mode_mid, value_mid;
 
@@ -61,36 +66,40 @@ void read_hw_key();
 
 void read_fpga_key();
 
-void clock();
-
 int main();
 
-struct clock_values
-{
+void reset_value(int mode);
+
+void clock();
+
+typedef struct _clock_values {
     int time;
     int bonus_time;
-};
+}clock_values;
 
-struct count_values
-{
+
+void counter();
+
+typedef struct _counter_values {
     int exponent;
     int value;
-};
+}counter_values;
 
+void text_editor();
 
-struct editor_values
-{
+typedef struct _text_editor_values {
     int count;
     char is_letter_mode;
     char *string;
     char prev_value;
     int length;
-};
+}text_editor_values;
 
-struct draw_values
-{
+void draw_board();
+
+typedef struct _draw_board_values {
     int count;
     int cursor_point;
-    char* board;
-};
+    char *board;
+}draw_board_values;
 #endif //EMBEDDED_MAIN_H
