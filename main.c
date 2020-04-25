@@ -184,9 +184,7 @@ void clock_process() {
 
     if (button_addr[3] == 1 && clockValues->editable)
         clockValues->bonus_time += 60;
-
-    printf("bonus time : %d\n",clockValues->bonus_time);
-
+    
     shmdt(button_addr);
     shmdt(clockValues);
 }
