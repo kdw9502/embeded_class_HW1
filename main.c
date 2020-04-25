@@ -3,7 +3,12 @@
 void input_process() {
     if (fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR) == -1)
     {
-        printf("Device Open Error\n");
+        printf("Switch Device Open Error\n");
+        return;
+    }
+    if (hw_button_device = open("/dev/input/event0",O_RDONLY | O_NONBLOCK))
+    {
+        printf("Hardware key Device Open Error\n");
         return;
     }
     while (1) {
@@ -99,32 +104,24 @@ void read_hw_key() {
     char* device = "/dev/input/event0";
     int* mode;
     struct input_event ev[BUFF_SIZE];
-    int fd, rd, size = sizeof (struct input_event);
+    int rd, size = sizeof (struct input_event);
     mode = (int*)shmat(mode_mid, (int*) NULL,0);
 
-    if ((fd = open(device, O_RDONLY | O_NONBLOCK)) == -1) {
-        printf("%s is not a vaild device\n", device);
-        return;
-    }
-
-    if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
+    if ((rd = read(hw_button_device, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
-        printf("%d",rd);
         printf("hw wait return\n");
 #endif
-        close(fd);
         return;
     }
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
     {
         if (ev[0].code == BACK_KEY_CODE) {
-            close(fd);
             exit(0);
         } else {
             if (ev[0].code == VOLUME_UP) {
-                mode[0] = mode[0] + 1 % MODE_COUNT + MODE_CHANGED;
+                mode[0] = (mode[0] + 1) % MODE_COUNT + MODE_CHANGED;
             } else if (ev[0].code == VOLUME_DOWN) {
-                mode[0] = mode[0] + MODE_COUNT - 1 % MODE_COUNT + MODE_CHANGED;
+                mode[0] = (mode[0] + MODE_COUNT - 1) % MODE_COUNT + MODE_CHANGED;
             }
         }
     }
@@ -247,6 +244,7 @@ int main() {
                     break;
                 default:
                     main_process();
+                    break;
             }
             break;
     }

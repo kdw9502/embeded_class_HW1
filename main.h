@@ -108,5 +108,6 @@ typedef struct _draw_board_values {
 void set_fnd(int value);
 
 int fpga_switch_device;
+int hw_button_device;
 #define DEBUG
 #endif //EMBEDDED_MAIN_H
