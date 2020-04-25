@@ -7,14 +7,8 @@ void input_process() {
         return;
     }
     while (1) {
-#ifdef DEBUG
-        printf("input_process\n");
-#endif
         read_hw_key(mode_mid);
         //read_fpga_key(button_mid);
-#ifdef DEBUG
-        printf("input_process2\n");
-#endif
         usleep(DELAY);
     }
 }
