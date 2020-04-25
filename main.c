@@ -6,7 +6,7 @@ void input_process() {
         printf("Switch Device Open Error\n");
         return;
     }
-    if (hw_button_device = open("/dev/input/event0",O_RDONLY | O_NONBLOCK))
+    if (hw_button_device = open("/dev/input/event0",O_RDONLY | O_NONBLOCK) == -1)
     {
         printf("Hardware key Device Open Error\n");
         return;
