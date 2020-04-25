@@ -139,9 +139,9 @@ void read_fpga_key() {
     }
 
 #ifdef DEBUG
-    for (i = 0; i < MAX_BUTTON; i++) {
-        printf("[%d] ", button_addr[i]);
-    }
+//    for (i = 0; i < MAX_BUTTON; i++) {
+//        printf("[%d] ", button_addr[i]);
+//    }
 #endif
     printf("\n");
     shmdt(button_addr);
@@ -183,7 +183,7 @@ void set_fnd(int value) {
 
     dev = open("/dev/fpga_fnd", O_RDWR);
 
-    printf("%d", value);
+    printf("value %d\n", value);
     sprintf(data, "%04d\n", value);
 
     write(dev, &data, 4);
@@ -199,7 +199,7 @@ void clock_output() {
     int hour = now / 3600 % 24;
     int min = now % 60;
 
-    printf("%d %d", hour, min);
+    printf(hour,min, "%d %d", hour, min);
     set_fnd(hour * 100 + min);
 }
 
