@@ -1,6 +1,7 @@
 #include "main.h"
 
 void input_process() {
+    printf("1\n");
     if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR)) == -1)
     {
         printf("Switch Device Open Error\n");
@@ -12,6 +13,7 @@ void input_process() {
         return;
     }
     while (1) {
+        printf("2\n");
         read_hw_key(mode_mid);
         //read_fpga_key(button_mid);
         usleep(DELAY);
@@ -19,12 +21,15 @@ void input_process() {
 }
 
 void main_process() {
+    printf("3\n");
     int *mode_addr;
     while (1) {
+        printf("4\n");
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
         if (mode_addr[0] >= MODE_CHANGED)
         {
+            printf("5\n");
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
         }
@@ -55,7 +60,9 @@ void output_process() {
 
 void reset_value(int mode)
 {
+    printf("6\n");
     void* value_addr = (void*) shmat(value_mid, (void*) NULL,0);
+    printf("7\n");
     switch (mode)
     {
         case CLOCK_MODE:
