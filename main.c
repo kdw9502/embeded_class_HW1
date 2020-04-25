@@ -140,7 +140,7 @@ void read_fpga_key() {
     int buff_size;
     unsigned char *button_addr;
 #ifdef DEBUG
-    printf("read fpga key");
+    printf("read fpga key\n");
 #endif
     if (dev = open("/dev/fpga_push_switch", O_RDWR) == -1)
     {
