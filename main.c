@@ -168,6 +168,10 @@ void clock_process() {
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
 
+    printf("bonus time : %d",clockValues->bonus_time);
+
+    shmdt(button_addr);
+    shmdt(clockValues);
 }
 
 void counter_process() {
@@ -184,7 +188,6 @@ void draw_board_process() {
 
 void set_fnd(int value) {
     unsigned char data[5] ={0,};
-    memset(data, 0, sizeof(data));
 
 
     printf("value %d\n", value);
