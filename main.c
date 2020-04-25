@@ -160,13 +160,12 @@ void read_fpga_key() {
 }
 
 void clock_process() {
-    printf("1\n");
 
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
-    printf("2\n");
+
     if (button_addr[2] == 1)
         clockValues->bonus_time = 0;
 
@@ -175,7 +174,7 @@ void clock_process() {
 
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
-    printf("3\n");
+
     printf("bonus time : %d\n",clockValues->bonus_time);
 
     shmdt(button_addr);
