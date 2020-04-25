@@ -129,13 +129,15 @@ void read_fpga_key() {
     int i;
     int buff_size;
     unsigned char *button_addr;
+    unsigned char buffer[MAX_BUTTON];
 
-    printf("1");
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
-    printf("2");
     printf("fpga_switch_device :%d\n", fpga_switch_device);
-    read(fpga_switch_device, &button_addr, buff_size);
-    printf("3");
+    read(fpga_switch_device, &buffer, sizeof(buffer));
+    for (i = 0; i < MAX_BUTTON; i++) {
+        button_addr[i] = buffer[i];
+    }
+
 #ifdef DEBUG
     for (i = 0; i < MAX_BUTTON; i++) {
         printf("[%d] ", button_addr[i]);
