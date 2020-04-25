@@ -147,7 +147,7 @@ void read_fpga_key() {
 }
 
 void clock_process() {
-    int *button_addr;
+    unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     clock_values* clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values*)NULL, 0);

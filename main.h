@@ -27,6 +27,7 @@
 
 #include <sys/mman.h>
 #include "main.h"
+#include <string.h>
 
 #define BUFF_SIZE 64
 
