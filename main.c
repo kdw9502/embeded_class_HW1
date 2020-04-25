@@ -195,7 +195,7 @@ void clock_output() {
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
     time_t now;
     now = time(NULL) + clockValues->bonus_time;
-
+    printf("%ld",now);
     int hour = now / 3600 % 24;
     int min = now % 60;
 
