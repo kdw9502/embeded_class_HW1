@@ -21,14 +21,14 @@ void main_process() {
     printf("init main process\n");
     int *mode_addr;
     while (1) {
-        printf("main 2");
+        printf("main 2\n");
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
-        printf("main 3");
+        printf("main 3\n");
         if (mode_addr[0] >= MODE_CHANGED) {
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
         }
-        printf("mode main:%d",mode_addr[0]);
+        printf("mode main:%d\n",mode_addr[0]);
         switch (mode_addr[0]) {
             case CLOCK_MODE:
                 clock_process();
@@ -51,7 +51,7 @@ void output_process() {
 
     if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1)
     {
-        printf("fnd disabled");
+        printf("fnd disabled\n");
         return;
     }
     while (1) {
@@ -160,13 +160,13 @@ void read_fpga_key() {
 }
 
 void clock_process() {
-    printf("1");
+    printf("1\n");
 
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
-    printf("2");
+    printf("2\n");
     if (button_addr[2] == 1)
         clockValues->bonus_time = 0;
 
@@ -175,8 +175,8 @@ void clock_process() {
 
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
-    printf("3");
-    printf("bonus time : %d",clockValues->bonus_time);
+    printf("3\n");
+    printf("bonus time : %d\n",clockValues->bonus_time);
 
     shmdt(button_addr);
     shmdt(clockValues);
