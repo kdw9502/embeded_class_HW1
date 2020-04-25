@@ -47,7 +47,7 @@ void output_process() {
     printf("init output process\n");
     int *mode_addr;
 
-    if ((fpga_led_mmap = open(open("/dev/mem", O_RDWR | O_SYNC))) == -1)
+    if ((fpga_led_mmap = open("/dev/mem", O_RDWR | O_SYNC)) == -1)
     {
         printf("led disabled\n");
         return;
