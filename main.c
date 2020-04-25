@@ -43,6 +43,12 @@ void main_process() {
 
 void output_process() {
     int *mode_addr;
+
+    if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1)
+    {
+        printf("fnd disabled");
+        return;
+    }
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
 
@@ -177,16 +183,14 @@ void draw_board_process() {
 }
 
 void set_fnd(int value) {
-    int dev;
     unsigned char data[5];
     memset(data, 0, sizeof(data));
 
-    dev = open("/dev/fpga_fnd", O_RDWR);
 
     printf("value %d\n", value);
     sprintf(data, "%04d\n", value);
 
-    write(dev, &data, 4);
+    write(fpga_fnd_device, &data, 4);
     close(dev);
 }
 
@@ -195,11 +199,9 @@ void clock_output() {
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
     time_t now;
     now = time(NULL) + clockValues->bonus_time;
-    printf("%ld",now);
     int hour = now / 3600 % 24;
     int min = now % 60;
 
-    printf("hour,min %d %d", hour, min);
     set_fnd(hour * 100 + min);
 }
 
