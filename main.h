@@ -106,5 +106,5 @@ typedef struct _draw_board_values {
 }draw_board_values;
 
 void set_fnd(int value);
-
+#define DEBUG
 #endif //EMBEDDED_MAIN_H
