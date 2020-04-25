@@ -164,12 +164,13 @@ void clock_process() {
 
     if (button_addr[2] == 1)
         clockValues->bonus_time = 0;
-
+    printf("21\n");
     if (button_addr[3] == 1)
         clockValues->bonus_time += 3600;
-
+    printf("22\n");
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
+    printf("23\n");
 
 
 
