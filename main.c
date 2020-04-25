@@ -63,7 +63,7 @@ void output_process() {
 //                draw_board_process();
         }
         shmdt(mode_addr);
-        usleep(delay);
+        usleep(DELAY);
     }
 }
 
