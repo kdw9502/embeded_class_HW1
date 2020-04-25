@@ -6,14 +6,14 @@ void input_process() {
         printf("Switch Device Open Error\n");
         return;
     }
-    if ((hw_button_device = open("/dev/input/event0",O_RDONLY | O_NONBLOCK)) == -1)
+    if ((hw_button_device = open("/dev/input/event0", O_RDONLY | O_NONBLOCK)) == -1)
     {
         printf("Hardware key Device Open Error\n");
         return;
     }
     while (1) {
         read_hw_key(mode_mid);
-        //read_fpga_key(button_mid);
+        read_fpga_key(button_mid);
         usleep(DELAY);
     }
 }
@@ -129,9 +129,6 @@ void read_hw_key() {
             }
         }
     }
-#ifdef DEBUG
-    printf("mode is %d\n", mode[0]);
-#endif
     shmdt(mode);
 }
 
