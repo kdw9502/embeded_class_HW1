@@ -191,7 +191,6 @@ void set_fnd(int value) {
     sprintf(data, "%04d\n", value);
 
     write(fpga_fnd_device, &data, 4);
-    close(dev);
 }
 
 void clock_output() {
