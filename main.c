@@ -25,7 +25,7 @@ void main_process() {
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
         }
-        print("mode main:%d",mode_addr[0]);
+        printf("mode main:%d",mode_addr[0]);
         switch (mode_addr[0]) {
             case CLOCK_MODE:
                 clock_process();
