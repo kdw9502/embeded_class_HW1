@@ -109,6 +109,7 @@ void read_hw_key() {
 
     if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
+        printf("%d",rd);
         printf("hw wait return\n");
 #endif
         close(fd);
