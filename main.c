@@ -1,16 +1,17 @@
 #include "main.h"
 
 void input_process() {
-
+    if (fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR) == -1)
+    {
+        printf("Device Open Error\n");
+        return;
+    }
     while (1) {
 #ifdef DEBUG
         printf("input_process\n");
 #endif
         read_hw_key(mode_mid);
         read_fpga_key(button_mid);
-#ifdef DEBUG
-        printf("input_process 2\n");
-#endif
         usleep(DELAY);
     }
 }
@@ -136,23 +137,12 @@ void read_hw_key() {
 
 void read_fpga_key() {
     int i;
-    int dev;
     int buff_size;
     unsigned char *button_addr;
-#ifdef DEBUG
-    printf("read fpga key\n");
-#endif
-    if (dev = open("/dev/fpga_push_switch", O_RDWR) == -1)
-    {
-#ifdef DEBUG
-        printf("Device Open Error\n");
-#endif
-        return;
-    }
 
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
-    read(dev, &button_addr, buff_size);
+    read(fpga_switch_device, &button_addr, buff_size);
 #ifdef DEBUG
     for(i=0;i<MAX_BUTTON;i++) {
         printf("[%d] ",button_addr[i]);
@@ -160,7 +150,6 @@ void read_fpga_key() {
 #endif
     printf("\n");
     shmdt(button_addr);
-    close(dev);
 }
 
 void clock_process() {
