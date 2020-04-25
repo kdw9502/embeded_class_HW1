@@ -4,10 +4,13 @@ void input_process() {
 
     while (1) {
 #ifdef DEBUG
-        printf("input_process");
+        printf("input_process\n");
 #endif
         read_hw_key(mode_mid);
         read_fpga_key(button_mid);
+#ifdef DEBUG
+        printf("input_process 2\n");
+#endif
         usleep(DELAY);
     }
 }
@@ -93,7 +96,7 @@ void reset_value(int mode)
 
 void read_hw_key() {
 #ifdef DEBUG
-    printf("read_hw");
+    printf("read_hw\n");
 #endif
     char* device = "/dev/input/event0";
     int* mode;
@@ -102,12 +105,12 @@ void read_hw_key() {
     mode = (int*)shmat(mode_mid, (int*) NULL,0);
 
     if ((fd = open(device, O_RDONLY | O_NONBLOCK)) == -1) {
-        printf("%s is not a vaild device\\n", device);
+        printf("%s is not a vaild device\n", device);
     }
 
     if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
-        printf("hw wait return");
+        printf("hw wait return\n");
 #endif
         return;
     }
