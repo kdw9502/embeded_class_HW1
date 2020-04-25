@@ -145,11 +145,12 @@ void read_fpga_key() {
     }
 
 #ifdef DEBUG
-//    for (i = 0; i < MAX_BUTTON; i++) {
-//        printf("[%d] ", button_addr[i]);
-//    }
-#endif
+    for (i = 0; i < MAX_BUTTON; i++) {
+        printf("[%d] ", button_addr[i]);
+    }
     printf("\n");
+#endif
+
     shmdt(button_addr);
 }
 
@@ -197,7 +198,6 @@ void set_fnd(int value) {
     write(fpga_fnd_device, &data, 4);
 
     read(fpga_fnd_device,&data,4);
-    printf("%s", data);
 }
 
 void clock_output() {
