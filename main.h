@@ -84,7 +84,7 @@ typedef struct _clock_values {
     int time;
     int bonus_time;
     int editable;
-}clock_values;
+} clock_values;
 
 
 void counter_process();
@@ -92,7 +92,7 @@ void counter_process();
 typedef struct _counter_values {
     int exponent;
     int value;
-}counter_values;
+} counter_values;
 
 void text_editor_process();
 
@@ -102,7 +102,7 @@ typedef struct _text_editor_values {
     char *string;
     char prev_value;
     int length;
-}text_editor_values;
+} text_editor_values;
 
 void draw_board_process();
 
@@ -110,10 +110,16 @@ typedef struct _draw_board_values {
     int count;
     int cursor_point;
     char *board;
-}draw_board_values;
+} draw_board_values;
+
+int int_to_four_digit(int value, int exponent);
 
 void set_fnd(int value);
+
 void clock_output();
+
+void counter_output();
+
 int fpga_switch_device;
 int hw_button_device;
 int fpga_fnd_device;

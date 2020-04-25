@@ -2,7 +2,7 @@
 
 void input_process() {
     printf("init input process\n");
-    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR| O_NONBLOCK)) == -1) {
+    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR | O_NONBLOCK)) == -1) {
         printf("Switch Device Open Error\n");
         return;
     }
@@ -26,18 +26,22 @@ void main_process() {
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
         }
-        printf("mode main:%d\n",mode_addr[0]);
+//        printf("mode main:%d\n", mode_addr[0]);
         switch (mode_addr[0]) {
             case CLOCK_MODE:
                 clock_process();
+                break;
             case COUNTER_MODE:
                 counter_process();
+                break;
             case TEXT_MODE:
                 text_editor_process();
+                break;
             case DRAW_MODE:
                 draw_board_process();
+                break;
         }
-        shmdt(mode_addr);
+        //shmdt(mode_addr);
 
         usleep(DELAY);
     }
@@ -47,54 +51,62 @@ void output_process() {
     printf("init output process\n");
     int *mode_addr;
 
-    if ((fpga_led_mmap = open("/dev/mem", O_RDWR | O_SYNC)) == -1)
-    {
+    if ((fpga_led_mmap = open("/dev/mem", O_RDWR | O_SYNC)) == -1) {
         printf("led disabled\n");
         return;
     }
 
-    if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1)
-    {
+    if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1) {
         printf("fnd disabled\n");
         return;
     }
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
+//        printf("output mode : %d",mode_addr[0]);
 
         switch (mode_addr[0]) {
             case CLOCK_MODE:
                 clock_output();
-//            case COUNTER_MODE:
-//                counter_process();
+                break;
+            case COUNTER_MODE:
+                counter_output();
+                break;
 //            case TEXT_MODE:
 //                text_editor_process();
+//                break;
 //            case DRAW_MODE:
 //                draw_board_process();
+//                break;
         }
-        shmdt(mode_addr);
+        //shmdt(mode_addr);
         usleep(DELAY * 2);
     }
 }
 
 void reset_value(int mode) {
     void *value_addr = (void *) shmat(value_mid, (void *) NULL, 0);
+    clock_values *a;
+    counter_values *b;
+    text_editor_values *c;
+    draw_board_values *d;
     switch (mode) {
         case CLOCK_MODE:
-            value_addr = malloc(sizeof(clock_values));
-            clock_values *a = (clock_values *) value_addr;
+//            printf("reset to clock");
+            a = (clock_values *) value_addr;
             a->time = 0;
             a->bonus_time = 0;
             a->editable = False;
+//            printf("time, bonus time %d %d\n",a->time, a->bonus_time);
             break;
         case COUNTER_MODE:
-            value_addr = malloc(sizeof(counter_values));
-            counter_values *b = (counter_values *) value_addr;
+//            printf("reset to counter");
+            b = (counter_values *) value_addr;
             b->exponent = 10;
             b->value = 0;
+//            printf("exponent, value time %d %d\n", b->exponent, b->value);
             break;
         case TEXT_MODE:
-            value_addr = malloc(sizeof(text_editor_values));
-            text_editor_values *c = (text_editor_values *) value_addr;
+            c = (text_editor_values *) value_addr;
             c->count = 0;
             c->is_letter_mode = True;
             c->length = 0;
@@ -103,14 +115,13 @@ void reset_value(int mode) {
             c->string[0] = '\0';
             break;
         case DRAW_MODE:
-            value_addr = malloc(sizeof(draw_board_values));
-            draw_board_values *d = (draw_board_values *) value_addr;
+            d = (draw_board_values *) value_addr;
             d->count = 0;
             d->board = (char *) malloc(sizeof(char *) * 200);
             d->cursor_point = 0;
             break;
     }
-    shmdt(value_addr);
+    //shmdt(value_addr);
 }
 
 void read_hw_key() {
@@ -135,9 +146,9 @@ void read_hw_key() {
         }
     }
 #ifdef DEBUG
-    printf("mode is %d\n", mode[0]);
+//    printf("mode is %d\n", mode[0]);
 #endif
-    shmdt(mode);
+    //shmdt(mode);
 }
 
 void read_fpga_key() {
@@ -160,7 +171,7 @@ void read_fpga_key() {
 //    printf("\n");
 #endif
 
-    shmdt(button_addr);
+    //shmdt(button_addr);
 }
 
 void clock_process() {
@@ -171,37 +182,55 @@ void clock_process() {
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
 
 
-    if (button_addr[0] == 1)
-    {
-        if (clockValues->editable == True)
-        {
+    if (button_addr[0] == 1) {
+        if (clockValues->editable == True) {
             clockValues->editable = False;
 
             gettimeofday(&timeval, NULL);
             timeval.tv_sec += clockValues->bonus_time;
             settimeofday(&timeval, NULL);
             clockValues->bonus_time = 0;
-        }
-        else{
+        } else {
             clockValues->editable = True;
         }
     }
 
-    if (button_addr[1] == 1 && clockValues->editable)
+    if (button_addr[1] == True && clockValues->editable)
         clockValues->bonus_time = 0;
 
-    if (button_addr[2] == 1 && clockValues->editable)
+    if (button_addr[2] == True && clockValues->editable)
         clockValues->bonus_time += 3600;
 
-    if (button_addr[3] == 1 && clockValues->editable)
+    if (button_addr[3] == True && clockValues->editable)
         clockValues->bonus_time += 60;
-    
-    shmdt(button_addr);
-    shmdt(clockValues);
+
+    //shmdt(button_addr);
+    //shmdt(clockValues);
 }
 
-void counter_process() {
+unsigned char next_exp_map[11] = {0, 0, 10, 0, 2, 0, 0, 0, 4, 0, 8};
 
+void counter_process() {
+    unsigned char *button_addr;
+    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
+    counter_values *counterValues;
+    counterValues = (counter_values *) shmat(value_mid, (counter_values *) NULL, 0);
+
+    if (button_addr[0] == True) {
+        counterValues->exponent = next_exp_map[counterValues->exponent];
+    } else if (button_addr[1] == True) {
+        counterValues->value += counterValues->exponent * counterValues->exponent;
+    } else if (button_addr[2] == True) {
+        counterValues->value += counterValues->exponent;
+    } else if (button_addr[3] == True) {
+        counterValues->value += 1;
+    }
+
+    printf("main val, exp : %d %d\n", counterValues->value, counterValues->exponent);
+
+
+    //shmdt(button_addr);
+    //shmdt(counterValues);
 }
 
 void text_editor_process() {
@@ -213,33 +242,43 @@ void draw_board_process() {
 }
 
 void set_fnd(int value) {
-    unsigned char data[4] ={0,};
+    unsigned char data[4] = {0,};
 
-    data[0] = value/1000 % 10;
-    data[1] = value/100 % 10;
-    data[2] = value/10 % 10;
+    data[0] = value / 1000 % 10;
+    data[1] = value / 100 % 10;
+    data[2] = value / 10 % 10;
     data[3] = value % 10;
 
     write(fpga_fnd_device, &data, 4);
 
-    read(fpga_fnd_device,&data,4);
+    read(fpga_fnd_device, &data, 4);
 }
 
-void set_led(unsigned char binary_data)
-{
+int int_to_four_digit(int value, int exponent) {
+    int result = 0;
+
+    result += value / (exponent * exponent * exponent) % exponent * 1000;
+    result += value / (exponent * exponent) % exponent * 100;
+    result += value / exponent % exponent * 10;
+    result += value % exponent;
+
+    return result;
+}
+
+void set_led(unsigned char binary_data) {
     unsigned long *fpga_addr = 0;
     unsigned char *led_addr = 0;
-    fpga_addr = (unsigned long *)mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fpga_led_mmap, FPGA_BASE_ADDRESS);
-    if (fpga_addr == MAP_FAILED)
-    {
+    fpga_addr = (unsigned long *) mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fpga_led_mmap,
+                                       FPGA_BASE_ADDRESS);
+    if (fpga_addr == MAP_FAILED) {
         printf("mmap error!\n");
         close(fpga_led_mmap);
         return;
     }
 
-    led_addr=(unsigned char*)((void*)fpga_addr+LED_ADDR);
+    led_addr = (unsigned char *) ((void *) fpga_addr + LED_ADDR);
 
-    *led_addr=binary_data;
+    *led_addr = binary_data;
 }
 
 void clock_output() {
@@ -252,21 +291,44 @@ void clock_output() {
 
     set_fnd(hour * 100 + min);
 
-    if (clockValues->editable == False)
-    {
+    if (clockValues->editable == False) {
         set_led(0b10000000);
-    }
-    else
-    {
-        if (now % 2 == 1){
+    } else {
+        if (now % 2 == 1) {
             set_led(0b00100000);
-        }
-        else{
+        } else {
             set_led(0b00010000);
         }
     }
+    //shmdt(clockValues);
+}
 
+void counter_output() {
+    counter_values *values;
+    values = (counter_values *) shmat(value_mid, (counter_values *) NULL, 0);
+    int exp = values->exponent;
+    int val = values->value;
 
+    char buffer[100];
+    int fnd_val = 0;
+
+    if (exp == 10) {
+        set_led(0b01000000);
+        set_fnd(val % 1000);
+    } else if (exp == 2) {
+        set_led(0b10000000);
+        fnd_val = int_to_four_digit(val, 2);
+        set_fnd(fnd_val);
+    } else if (exp == 4){
+        set_led(0b00010000);
+        fnd_val = int_to_four_digit(val, 4);
+        set_fnd(fnd_val);
+    } else if (exp == 8){
+        set_led(0b00100000);
+        fnd_val = int_to_four_digit(val, 8);
+        set_fnd(fnd_val);
+    }
+    //shmdt(values);
 }
 
 int main() {
@@ -281,7 +343,7 @@ int main() {
     int *mode_addr;
     mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
     mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
-    shmdt(mode_addr);
+    //shmdt(mode_addr);
 
     switch (fork()) {
         case -1: //fail
