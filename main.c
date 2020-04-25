@@ -192,6 +192,9 @@ void set_fnd(int value) {
 
     printf("%s", data);
     write(fpga_fnd_device, &data, 4);
+
+    read(fpga_fnd_device,&data,4);
+    printf("%s", data);
 }
 
 void clock_output() {
