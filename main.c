@@ -171,13 +171,6 @@ void clock_process() {
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
     printf("23\n");
-
-
-
-    char command[30];
-    sprintf(command, "date -d \"+%s hours\" \"+%s min\"");
-    if (button_addr[1] == 1)
-        system(command);
 }
 
 void counter_process()
