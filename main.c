@@ -66,8 +66,11 @@ void reset_value(int mode)
     switch (mode)
     {
         case CLOCK_MODE:
+            printf("77\n");
             value_addr = malloc(sizeof(clock_values));
+            printf("8\n");
             clock_values *a = (clock_values*)value_addr;
+            printf("9\n");
             a->time = 0;
             a->bonus_time = 0;
 
