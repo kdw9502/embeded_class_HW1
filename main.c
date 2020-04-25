@@ -12,7 +12,6 @@ void input_process() {
         return;
     }
     while (1) {
-        printf("%d\n", hw_button_device);
         read_hw_key(mode_mid);
         //read_fpga_key(button_mid);
         usleep(DELAY);
@@ -28,7 +27,7 @@ void main_process() {
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
-        if (mode_addr[0] > MODE_CHANGED)
+        if (mode_addr[0] >= MODE_CHANGED)
         {
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
