@@ -106,7 +106,7 @@ void read_hw_key() {
     struct input_event ev[BUFF_SIZE];
     int rd, size = sizeof (struct input_event);
     mode = (int*)shmat(mode_mid, (int*) NULL,0);
-    printf("read_hw0\n");
+    printf("read_hw0 %d\n",hw_button_device);
     if ((rd = read(hw_button_device, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
         printf("hw wait return: %d\n",rd);
