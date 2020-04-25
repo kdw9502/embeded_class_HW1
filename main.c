@@ -12,7 +12,7 @@ void input_process() {
         return;
     }
     while (1) {
-        printf("%d", hw_button_device)
+        printf("%d", hw_button_device);
         read_hw_key(mode_mid);
         //read_fpga_key(button_mid);
         usleep(DELAY);
