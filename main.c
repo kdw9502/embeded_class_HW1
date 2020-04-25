@@ -14,6 +14,7 @@ void main_process() {
     mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
     mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
 
+
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
@@ -117,6 +118,7 @@ void read_hw_key() {
 #ifdef DEBUG
     printf("mode is %d", mode[0]);
 #endif
+    shmdt(mode);
     close(fd);
 }
 
