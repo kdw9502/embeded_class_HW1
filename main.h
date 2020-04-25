@@ -80,6 +80,7 @@ void clock_process();
 typedef struct _clock_values {
     int time;
     int bonus_time;
+    int editable;
 }clock_values;
 
 

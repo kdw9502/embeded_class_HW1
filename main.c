@@ -21,9 +21,7 @@ void main_process() {
     printf("init main process\n");
     int *mode_addr;
     while (1) {
-        printf("main 2\n");
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
-        printf("main 3\n");
         if (mode_addr[0] >= MODE_CHANGED) {
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
@@ -166,13 +164,25 @@ void clock_process() {
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
 
-    if (button_addr[2] == 1)
+    if (button_addr[0] == 1)
+    {
+        if (clockValues->editable == True)
+        {
+            clockValues->editable = False;
+            // set device time
+        }
+        else{
+            clockValues->editable = True;
+        }
+    }
+
+    if (button_addr[1] == 1 && clockValues->editable)
         clockValues->bonus_time = 0;
 
-    if (button_addr[3] == 1)
+    if (button_addr[2] == 1 && clockValues->editable)
         clockValues->bonus_time += 3600;
 
-    if (button_addr[4] == 1)
+    if (button_addr[3] == 1 && clockValues->editable)
         clockValues->bonus_time += 60;
 
     printf("bonus time : %d\n",clockValues->bonus_time);
