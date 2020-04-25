@@ -19,6 +19,7 @@ void input_process() {
 }
 
 void main_process() {
+    int *mode_addr;
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
@@ -39,6 +40,7 @@ void main_process() {
             case DRAW_MODE:
                 draw_board_process();
         }
+        shmdt(mode_addr);
 
         usleep(DELAY);
     }
@@ -53,7 +55,6 @@ void output_process() {
 
 void reset_value(int mode)
 {
-    int *mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
     void* value_addr = (void*) shmat(value_mid, (void*) NULL,0);
     switch (mode)
     {
@@ -88,7 +89,6 @@ void reset_value(int mode)
             d->cursor_point = 0;
             break;
     }
-    shmdt(mode_addr);
     shmdt(value_addr);
 }
 
