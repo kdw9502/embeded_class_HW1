@@ -54,7 +54,7 @@
 #define False 0
 #define True 1
 
-#define MODE_CHANGED 10
+#define MODE_CHANGED 100
 
 int button_mid, mode_mid, value_mid;
 
