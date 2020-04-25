@@ -129,7 +129,6 @@ void read_hw_key() {
     printf("mode is %d\n", mode[0]);
 #endif
     shmdt(mode);
-    close(fd);
 }
 
 void read_fpga_key() {
