@@ -26,20 +26,20 @@ void main_process() {
         switch (mode_addr[0])
         {
             case CLOCK_MODE:
-                clock();
+                clock_process();
             case COUNTER_MODE:
-                counter();
+                counter_process();
             case TEXT_MODE:
-                text_editor();
+                text_editor_process();
             case DRAW_MODE:
-                draw_board();
+                draw_board_process();
         }
 
         usleep(DELAY);
     }
 }
 
-void output_process(int button_mid, int mode_mid) {
+void output_process() {
 //    int *button_addr;
 //    int *mode_addr;
 //    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
@@ -48,7 +48,7 @@ void output_process(int button_mid, int mode_mid) {
 
 void reset_value(int mode)
 {
-    int *mode_addr = (int char *) shmat(mode_mid, (unsigned char *) NULL, 0);
+    int *mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
     void* value_addr = (void*) shmat(value_mid, (void*) NULL,0);
     switch (mode)
     {
@@ -71,7 +71,7 @@ void reset_value(int mode)
             c->count=0;
             c->is_letter_mode=True;
             c->length=0;
-            c->prev_value='';
+            c->prev_value=0;
             c->string = (char*)malloc(sizeof(char*)*8);
             c->string[0] = '\0';
             break;
@@ -90,6 +90,8 @@ void reset_value(int mode)
 void read_hw_key() {
     char* device = "/dev/input/event0";
     int* mode;
+    struct input_event ev[BUFF_SIZE];
+    int fd, rd, size = sizeof (struct input_event);
     mode = (int*)shmat(mode_mid, (int*) NULL,0);
 
     if ((fd = open(device, O_RDONLY | O_NONBLOCK)) == -1) {
@@ -98,7 +100,7 @@ void read_hw_key() {
 
     if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
         printf("read()");
-        continue;
+        return;
     }
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
     {
@@ -106,9 +108,9 @@ void read_hw_key() {
             close(fd);
             exit(0);
         } else {
-            if (code == VOLUME_UP) {
+            if (ev[0].code == VOLUME_UP) {
                 mode[0] = mode[0] + 1 % MODE_COUNT + MODE_CHANGED;
-            } else if (code == VOLUME_DOWN) {
+            } else if (ev[0].code == VOLUME_DOWN) {
                 mode[0] = mode[0] + MODE_COUNT - 1 % MODE_COUNT + MODE_CHANGED;
             }
         }
@@ -135,7 +137,7 @@ void read_fpga_key() {
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
     read(dev, &button_addr, buff_size);
-#ifdef
+#ifdef DEBUG
     for(i=0;i<MAX_BUTTON;i++) {
         printf("[%d] ",button_addr[i]);
     }
@@ -145,7 +147,7 @@ void read_fpga_key() {
     close(dev);
 }
 
-void clock() {
+void clock_process() {
     int *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     clock_values* clockValues;
@@ -166,6 +168,22 @@ void clock() {
         system(command);
 
 }
+
+void counter_process()
+{
+
+}
+
+void text_editor_process()
+{
+
+}
+
+void draw_board_process()
+{
+    
+}
+
 
 void clock_output()
 {

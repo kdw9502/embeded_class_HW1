@@ -62,7 +62,7 @@ void input_process();
 
 void main_process();
 
-void output_process(int button_mid, int mode_mid);
+void output_process();
 
 void read_hw_key();
 
@@ -72,7 +72,7 @@ int main();
 
 void reset_value(int mode);
 
-void clock();
+void clock_process();
 
 typedef struct _clock_values {
     int time;
@@ -80,14 +80,14 @@ typedef struct _clock_values {
 }clock_values;
 
 
-void counter();
+void counter_process();
 
 typedef struct _counter_values {
     int exponent;
     int value;
 }counter_values;
 
-void text_editor();
+void text_editor_process();
 
 typedef struct _text_editor_values {
     int count;
@@ -97,7 +97,7 @@ typedef struct _text_editor_values {
     int length;
 }text_editor_values;
 
-void draw_board();
+void draw_board_process();
 
 typedef struct _draw_board_values {
     int count;
