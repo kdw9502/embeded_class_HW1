@@ -142,6 +142,7 @@ void read_fpga_key() {
 
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
+    printf("%d", fpga_switch_device);
     read(fpga_switch_device, &button_addr, buff_size);
 #ifdef DEBUG
     for(i=0;i<MAX_BUTTON;i++) {
