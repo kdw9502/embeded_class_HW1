@@ -1,7 +1,6 @@
 #include "main.h"
 
 void input_process() {
-    printf("1\n");
     if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR)) == -1)
     {
         printf("Switch Device Open Error\n");
@@ -13,7 +12,6 @@ void input_process() {
         return;
     }
     while (1) {
-        printf("2\n");
         read_hw_key(mode_mid);
         //read_fpga_key(button_mid);
         usleep(DELAY);
@@ -21,23 +19,18 @@ void input_process() {
 }
 
 void main_process() {
-    printf("3\n");
     int *mode_addr;
     while (1) {
-        printf("4\n");
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
         if (mode_addr[0] >= MODE_CHANGED)
         {
-            printf("5\n");
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
         }
-        printf("15\n");
         switch (mode_addr[0])
         {
             case CLOCK_MODE:
-                printf("16\n");
                 clock_process();
             case COUNTER_MODE:
                 counter_process();
@@ -46,7 +39,6 @@ void main_process() {
             case DRAW_MODE:
                 draw_board_process();
         }
-        printf("17\n");
         shmdt(mode_addr);
 
         usleep(DELAY);
@@ -54,25 +46,35 @@ void main_process() {
 }
 
 void output_process() {
-//    int *button_addr;
-//    int *mode_addr;
-//    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
-//    mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
+    int *mode_addr;
+    while (1)
+    {
+        mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
+
+        switch (mode_addr[0])
+        {
+            case CLOCK_MODE:
+                clock_output();
+//            case COUNTER_MODE:
+//                counter_process();
+//            case TEXT_MODE:
+//                text_editor_process();
+//            case DRAW_MODE:
+//                draw_board_process();
+        }
+        shmdt(mode_addr);
+        usleep(delay);
+    }
 }
 
 void reset_value(int mode)
 {
-    printf("6\n");
     void* value_addr = (void*) shmat(value_mid, (void*) NULL,0);
-    printf("7\n");
     switch (mode)
     {
         case CLOCK_MODE:
-            printf("77\n");
             value_addr = malloc(sizeof(clock_values));
-            printf("8\n");
             clock_values *a = (clock_values*)value_addr;
-            printf("9\n");
             a->time = 0;
             a->bonus_time = 0;
 
@@ -101,9 +103,7 @@ void reset_value(int mode)
             d->cursor_point = 0;
             break;
     }
-    printf("10\n");
     shmdt(value_addr);
-    printf("11\n");
 }
 
 void read_hw_key() {
@@ -155,22 +155,19 @@ void read_fpga_key() {
 
 void clock_process() {
     unsigned char *button_addr;
-    printf("18\n");
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
-    printf("19\n");
     clock_values* clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values*)NULL, 0);
-    printf("20\n");
 
     if (button_addr[2] == 1)
         clockValues->bonus_time = 0;
-    printf("21\n");
+
     if (button_addr[3] == 1)
         clockValues->bonus_time += 3600;
-    printf("22\n");
+
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
-    printf("23\n");
+
 }
 
 void counter_process()
