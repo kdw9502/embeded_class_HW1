@@ -106,13 +106,14 @@ void read_hw_key() {
     struct input_event ev[BUFF_SIZE];
     int rd, size = sizeof (struct input_event);
     mode = (int*)shmat(mode_mid, (int*) NULL,0);
-
+    printf("read_hw0\n");
     if ((rd = read(hw_button_device, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
         printf("hw wait return: %d\n",rd);
 #endif
         return;
     }
+    printf("read_hw2\n");
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
     {
         if (ev[0].code == BACK_KEY_CODE) {
