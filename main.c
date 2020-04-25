@@ -17,10 +17,12 @@ void input_process() {
 }
 
 void main_process() {
+    printf("main 1");
     int *mode_addr;
     while (1) {
+        printf("main 2");
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
-
+        printf("main 3");
         if (mode_addr[0] >= MODE_CHANGED) {
             mode_addr[0] -= MODE_CHANGED;
             reset_value(mode_addr[0]);
@@ -146,10 +148,10 @@ void read_fpga_key() {
     }
 
 #ifdef DEBUG
-    for (i = 0; i < MAX_BUTTON; i++) {
-        printf("[%d] ", button_addr[i]);
-    }
-    printf("\n");
+//    for (i = 0; i < MAX_BUTTON; i++) {
+//        printf("[%d] ", button_addr[i]);
+//    }
+//    printf("\n");
 #endif
 
     shmdt(button_addr);
