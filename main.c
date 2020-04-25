@@ -199,7 +199,7 @@ void clock_output() {
     int hour = now / 3600 % 24;
     int min = now % 60;
 
-    printf(hour,min, "%d %d", hour, min);
+    printf("hour,min %d %d", hour, min);
     set_fnd(hour * 100 + min);
 }
 
