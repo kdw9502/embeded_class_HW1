@@ -27,6 +27,7 @@
 
 #include <sys/mman.h>
 #include "main.h"
+#include <string.h>
 
 #define BUFF_SIZE 64
 
@@ -54,7 +55,9 @@
 #define False 0
 #define True 1
 
-#define MODE_CHANGED 10
+#define MODE_CHANGED 100
+
+#define EXIT -1
 
 int button_mid, mode_mid, value_mid;
 
@@ -77,6 +80,7 @@ void clock_process();
 typedef struct _clock_values {
     int time;
     int bonus_time;
+    int editable;
 }clock_values;
 
 
@@ -104,4 +108,11 @@ typedef struct _draw_board_values {
     int cursor_point;
     char *board;
 }draw_board_values;
+
+void set_fnd(int value);
+void clock_output();
+int fpga_switch_device;
+int hw_button_device;
+int fpga_fnd_device;
+#define DEBUG
 #endif //EMBEDDED_MAIN_H
