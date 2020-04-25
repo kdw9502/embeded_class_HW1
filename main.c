@@ -129,6 +129,9 @@ void read_hw_key() {
             }
         }
     }
+#ifdef DEBUG
+    printf("mode is %d\n", mode[0]);
+#endif
     shmdt(mode);
 }
 
