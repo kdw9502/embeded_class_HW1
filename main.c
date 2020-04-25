@@ -104,12 +104,14 @@ void read_hw_key() {
 
     if ((fd = open(device, O_RDONLY | O_NONBLOCK)) == -1) {
         printf("%s is not a vaild device\n", device);
+        return;
     }
 
     if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
         printf("hw wait return\n");
 #endif
+        close(fd);
         return;
     }
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
