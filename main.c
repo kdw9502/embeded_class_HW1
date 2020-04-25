@@ -1,7 +1,7 @@
 #include "main.h"
 
 void input_process() {
-    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR)) == -1) {
+    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR| O_NONBLOCK)) == -1) {
         printf("Switch Device Open Error\n");
         return;
     }
@@ -132,7 +132,7 @@ void read_fpga_key() {
     unsigned char buffer[MAX_BUTTON];
 
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
-    printf("fpga_switch_device :%d\n", fpga_switch_device);
+
     read(fpga_switch_device, &buffer, sizeof(buffer));
     for (i = 0; i < MAX_BUTTON; i++) {
         button_addr[i] = buffer[i];
