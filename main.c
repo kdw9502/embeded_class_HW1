@@ -200,7 +200,7 @@ void clock_output() {
     time_t now;
     now = time(NULL) + clockValues->bonus_time;
     int hour = now / 3600 % 24;
-    int min = now % 60;
+    int min = now / 60 % 60;
 
     set_fnd(hour * 100 + min);
 }
