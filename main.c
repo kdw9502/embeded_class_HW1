@@ -1,7 +1,7 @@
 #include "main.h"
 
 void input_process() {
-    printf("init input process");
+    printf("init input process\n");
     if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR| O_NONBLOCK)) == -1) {
         printf("Switch Device Open Error\n");
         return;
@@ -18,7 +18,7 @@ void input_process() {
 }
 
 void main_process() {
-    printf("init main process");
+    printf("init main process\n");
     int *mode_addr;
     while (1) {
         printf("main 2");
@@ -46,7 +46,7 @@ void main_process() {
 }
 
 void output_process() {
-    printf("init output process");
+    printf("init output process\n");
     int *mode_addr;
 
     if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1)
