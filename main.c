@@ -1,18 +1,18 @@
 #include "main.h"
 
 void input_process() {
-    if (fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR) == -1)
+    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR)) == -1)
     {
         printf("Switch Device Open Error\n");
         return;
     }
-    if (hw_button_device = open("/dev/input/event0",O_RDONLY | O_NONBLOCK) == -1)
+    if ((hw_button_device = open("/dev/input/event0",O_RDONLY | O_NONBLOCK)) == -1)
     {
         printf("Hardware key Device Open Error\n");
         return;
     }
     while (1) {
-        printf("%d", hw_button_device);
+        printf("%d\n", hw_button_device);
         read_hw_key(mode_mid);
         //read_fpga_key(button_mid);
         usleep(DELAY);
