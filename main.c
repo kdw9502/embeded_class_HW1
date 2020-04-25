@@ -3,6 +3,9 @@
 void input_process() {
 
     while (1) {
+#ifdef DEBUG
+        printf("input_process");
+#endif
         read_hw_key(mode_mid);
         read_fpga_key(button_mid);
         usleep(DELAY);
@@ -89,6 +92,9 @@ void reset_value(int mode)
 }
 
 void read_hw_key() {
+#ifdef DEBUG
+    printf("read_hw");
+#endif
     char* device = "/dev/input/event0";
     int* mode;
     struct input_event ev[BUFF_SIZE];
@@ -100,6 +106,9 @@ void read_hw_key() {
     }
 
     if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
+#ifdef DEBUG
+        printf("hw wait return");
+#endif
         return;
     }
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
@@ -127,7 +136,9 @@ void read_fpga_key() {
     int dev;
     int buff_size;
     unsigned char *button_addr;
-
+#ifdef DEBUG
+    printf("read fpga key");
+#endif
     if (dev = open("/dev/fpga_push_switch", O_RDWR) == -1)
     {
         printf("Device Open Error\n");
