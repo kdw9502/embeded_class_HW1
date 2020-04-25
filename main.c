@@ -147,10 +147,6 @@ void read_fpga_key() {
 #ifdef DEBUG
         printf("Device Open Error\n");
 #endif
-        close(dev);
-#ifdef DEBUG
-        printf("Device Open Error2\n");
-#endif
         return;
     }
 
