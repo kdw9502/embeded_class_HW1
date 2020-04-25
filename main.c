@@ -187,13 +187,13 @@ void draw_board_process() {
 }
 
 void set_fnd(int value) {
-    unsigned char data[5] ={0,};
+    unsigned char data[4] ={0,};
 
+    data[0] = value/1000 % 10;
+    data[1] = value/100 % 10;
+    data[2] = value/10 % 10;
+    data[3] = value % 10;
 
-    printf("value %d\n", value);
-    sprintf(data, "%04d\n", value);
-
-    printf("%s", data);
     write(fpga_fnd_device, &data, 4);
 
     read(fpga_fnd_device,&data,4);
