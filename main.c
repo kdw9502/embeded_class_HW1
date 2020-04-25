@@ -19,11 +19,6 @@ void input_process() {
 }
 
 void main_process() {
-    int *mode_addr;
-    mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
-    mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
-
-
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
@@ -218,6 +213,10 @@ int main() {
         exit(1);
     }
 
+    int *mode_addr;
+    mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
+    mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
+    shmdt(mode_addr);
 
     switch (fork()) {
         case -1: //fail
