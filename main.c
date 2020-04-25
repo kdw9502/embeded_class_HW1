@@ -84,7 +84,7 @@ void reset_value(int mode) {
             clock_values *a = (clock_values *) value_addr;
             a->time = 0;
             a->bonus_time = 0;
-
+            a->editable = False;
             break;
         case COUNTER_MODE:
             value_addr = malloc(sizeof(counter_values));
@@ -164,7 +164,6 @@ void read_fpga_key() {
 }
 
 void clock_process() {
-    time_t temp_time;
     struct timeval timeval;
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
@@ -177,8 +176,10 @@ void clock_process() {
         if (clockValues->editable == True)
         {
             clockValues->editable = False;
-            temp_time = time(NULL) + clockValues->bonus_time;
-            stime(&time);
+
+            gettimeofday(&timeval, NULL);
+            timeval.tv_sec += clockValues->bonus_time;
+            settimeofday(&timeval, NULL);
             clockValues->bonus_time = 0;
         }
         else{
@@ -251,7 +252,7 @@ void clock_output() {
 
     set_fnd(hour * 100 + min);
 
-    if (clockValues->editable)
+    if (clockValues->editable == False)
     {
         set_led(0b10000000);
     }
