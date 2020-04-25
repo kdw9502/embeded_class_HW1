@@ -57,6 +57,8 @@
 
 #define MODE_CHANGED 100
 
+#define EXIT -1
+
 int button_mid, mode_mid, value_mid;
 
 void input_process();

@@ -23,6 +23,11 @@ void main_process() {
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int*)NULL,0);
 
+        if (mode_addr[0] == EXIT)
+        {
+            exit(0);
+        }
+
         if (mode_addr[0] >= MODE_CHANGED)
         {
             mode_addr[0] -= MODE_CHANGED;
@@ -120,7 +125,7 @@ void read_hw_key() {
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
     {
         if (ev[0].code == BACK_KEY_CODE) {
-            exit(0);
+            mode[0] = EXIT;
         } else {
             if (ev[0].code == VOLUME_UP) {
                 mode[0] = (mode[0] + 1) % MODE_COUNT + MODE_CHANGED;
