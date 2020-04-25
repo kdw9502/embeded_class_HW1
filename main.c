@@ -144,8 +144,13 @@ void read_fpga_key() {
 #endif
     if (dev = open("/dev/fpga_push_switch", O_RDWR) == -1)
     {
+#ifdef DEBUG
         printf("Device Open Error\n");
+#endif
         close(dev);
+#ifdef DEBUG
+        printf("Device Open Error2\n");
+#endif
         return;
     }
 
