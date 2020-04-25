@@ -107,7 +107,7 @@ typedef struct _draw_board_values {
 }draw_board_values;
 
 void set_fnd(int value);
-
+void clock_output();
 int fpga_switch_device;
 int hw_button_device;
 #define DEBUG
