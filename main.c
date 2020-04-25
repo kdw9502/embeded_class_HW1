@@ -183,13 +183,14 @@ void draw_board_process() {
 }
 
 void set_fnd(int value) {
-    unsigned char data[5];
+    unsigned char data[5] ={0,};
     memset(data, 0, sizeof(data));
 
 
     printf("value %d\n", value);
     sprintf(data, "%04d\n", value);
 
+    printf("%s", data);
     write(fpga_fnd_device, &data, 4);
 }
 
