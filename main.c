@@ -177,7 +177,7 @@ void clock_process() {
         if (clockValues->editable == True)
         {
             clockValues->editable = False;
-            temp_time = (time_t)(time(NULL) + clockValues->bonus_time);
+            temp_time = time(NULL) + clockValues->bonus_time;
             stime(&time);
             clockValues->bonus_time = 0;
         }
