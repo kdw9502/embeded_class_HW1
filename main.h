@@ -114,5 +114,6 @@ void clock_output();
 int fpga_switch_device;
 int hw_button_device;
 int fpga_fnd_device;
+int fpga_led_mmap;
 #define DEBUG
 #endif //EMBEDDED_MAIN_H

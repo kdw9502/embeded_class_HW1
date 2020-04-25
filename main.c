@@ -47,6 +47,12 @@ void output_process() {
     printf("init output process\n");
     int *mode_addr;
 
+    if ((fpga_led_mmap = open(open("/dev/mem", O_RDWR | O_SYNC))) == -1)
+    {
+        printf("led disabled\n");
+        return;
+    }
+
     if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1)
     {
         printf("fnd disabled\n");
@@ -158,18 +164,20 @@ void read_fpga_key() {
 }
 
 void clock_process() {
-
+    struct timeval timeval;
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
+
 
     if (button_addr[0] == 1)
     {
         if (clockValues->editable == True)
         {
             clockValues->editable = False;
-            // set device time
+            stime(time(NULL) + clockValues->bonus_time);
+            clockValues->bonus_time = 0;
         }
         else{
             clockValues->editable = True;
@@ -214,6 +222,23 @@ void set_fnd(int value) {
     read(fpga_fnd_device,&data,4);
 }
 
+void set_led(unsigned char binary_data)
+{
+    unsigned long *fpga_addr = 0;
+    unsigned char *led_addr = 0;
+    fpga_addr = (unsigned long *)mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fpga_led_mmap, FPGA_BASE_ADDRESS);
+    if (fpga_addr == MAP_FAILED)
+    {
+        printf("mmap error!\n");
+        close(fpga_led_mmap);
+        return;
+    }
+
+    led_addr=(unsigned char*)((void*)fpga_addr+LED_ADDR);
+
+    *led_addr=binary_data;
+}
+
 void clock_output() {
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
@@ -223,6 +248,22 @@ void clock_output() {
     int min = now / 60 % 60;
 
     set_fnd(hour * 100 + min);
+
+    if (clockValues->editable)
+    {
+        set_led(0b10000000);
+    }
+    else
+    {
+        if (now % 2 == 1){
+            set_led(0b00100000);
+        }
+        else{
+            set_led(0b00010000);
+        }
+    }
+
+
 }
 
 int main() {
