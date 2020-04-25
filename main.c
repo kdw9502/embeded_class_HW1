@@ -109,7 +109,7 @@ void read_hw_key() {
 
     if ((rd = read(hw_button_device, ev, size * BUFF_SIZE)) < size) {
 #ifdef DEBUG
-        printf("hw wait return\n");
+        printf("hw wait return: %d\n",rd);
 #endif
         return;
     }
@@ -126,7 +126,7 @@ void read_hw_key() {
         }
     }
 #ifdef DEBUG
-    printf("mode is %d", mode[0]);
+    printf("mode is %d\n", mode[0]);
 #endif
     shmdt(mode);
     close(fd);
@@ -139,7 +139,7 @@ void read_fpga_key() {
 
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
-    printf("%d", fpga_switch_device);
+    printf("fpga_switch_device :%d\n", fpga_switch_device);
     read(fpga_switch_device, &button_addr, buff_size);
 #ifdef DEBUG
     for(i=0;i<MAX_BUTTON;i++) {
@@ -196,7 +196,7 @@ void set_fnd(int value)
 
     dev = open("/dev/fpga_fnd", O_RDWR);
 
-    sprintf(data,"%04d",value);
+    sprintf(data,"%04d\n",value);
 
     write(dev,&data,4);
     close(dev);
