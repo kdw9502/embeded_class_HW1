@@ -99,7 +99,6 @@ void read_hw_key() {
     }
 
     if ((rd = read(fd, ev, size * BUFF_SIZE)) < size) {
-        printf("read()");
         return;
     }
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
@@ -162,11 +161,12 @@ void clock_process() {
     if (button_addr[4] == 1)
         clockValues->bonus_time += 60;
 
+
+
     char command[30];
     sprintf(command, "date -d \"+%s hours\" \"+%s min\"");
     if (button_addr[1] == 1)
         system(command);
-
 }
 
 void counter_process()
@@ -184,6 +184,19 @@ void draw_board_process()
     
 }
 
+void set_fnd(int value)
+{
+    int dev;
+    unsigned char data[5];
+    memset(data,0,sizeof(data));
+
+    dev = open("/dev/fpga_fnd", O_RDWR);
+
+    sprintf(data,"%04d",value);
+
+    write(dev,&data,4);
+    close(dev);
+}
 
 void clock_output()
 {
@@ -194,6 +207,8 @@ void clock_output()
 
     int hour = now / 3600 % 24;
     int min = now % 60;
+
+    set_fnd(hour*100 + min);
 }
 
 int main() {

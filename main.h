@@ -104,4 +104,7 @@ typedef struct _draw_board_values {
     int cursor_point;
     char *board;
 }draw_board_values;
+
+void set_fnd(int value);
+
 #endif //EMBEDDED_MAIN_H
