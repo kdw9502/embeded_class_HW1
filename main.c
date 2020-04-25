@@ -76,7 +76,7 @@ void reset_value(int mode)
             c->string[0] = '\0';
             break;
         case DRAW_MODE:
-            value_addr = main(sizeof(draw_board_values));
+            value_addr = malloc(sizeof(draw_board_values));
             draw_board_values *d = (draw_board_values*)value_addr;
             d->count = 0;
             d->board = (char*)malloc(sizeof(char*)*200);
