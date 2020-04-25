@@ -164,6 +164,7 @@ void read_fpga_key() {
 }
 
 void clock_process() {
+    time_t temp_time;
     struct timeval timeval;
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
@@ -176,7 +177,8 @@ void clock_process() {
         if (clockValues->editable == True)
         {
             clockValues->editable = False;
-            stime(time(NULL) + clockValues->bonus_time);
+            temp_time = (time_t)(time(NULL) + clockValues->bonus_time);
+            stime(&time);
             clockValues->bonus_time = 0;
         }
         else{

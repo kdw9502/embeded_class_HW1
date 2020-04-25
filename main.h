@@ -59,6 +59,9 @@
 
 #define EXIT -1
 
+#define FPGA_BASE_ADDRESS 0x08000000 //fpga_base address
+#define LED_ADDR 0x16
+
 int button_mid, mode_mid, value_mid;
 
 void input_process();
