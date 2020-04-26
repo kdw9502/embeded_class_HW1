@@ -327,7 +327,7 @@ void text_editor_process() {
             {
                 // 문자열 모드
                 if (val->is_letter_mode == True){
-                    printf("text %d pressed",i);
+                    printf("text %d pressed\n",i);
                     if(val->prev_value == i)
                     {
                         char now_editing_char = val->string[val->editing_index];
@@ -343,7 +343,7 @@ void text_editor_process() {
                 }
                 //숫자모드
                 else{
-                    printf("digit %d pressed",i);
+                    printf("digit %d pressed\n",i);
                     val->prev_value = -1;
                     val->editing_index ++;
                     val->string[val->editing_index] = '0' + i + 1;
@@ -469,7 +469,7 @@ void text_editor_output()
 
 
     int len = strlen(val->string);
-    printf("text output string %s len %s editing %d\n", val->string,len, val->editing_index);
+    printf("text output string: %s len %d editing %d\n", val->string,len, val->editing_index);
 
     if(len>0) {
         strncat(buffer,val->string,len);
