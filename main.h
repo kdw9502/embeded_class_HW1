@@ -62,6 +62,8 @@
 #define FPGA_BASE_ADDRESS 0x08000000 //fpga_base address
 #define LED_ADDR 0x16
 
+#define MAX_BUFF 32
+
 int button_mid, mode_mid, value_mid;
 
 void input_process();
@@ -99,9 +101,9 @@ void text_editor_process();
 typedef struct _text_editor_values {
     int count;
     char is_letter_mode;
-    char *string;
+    char string[100];
     char prev_value;
-    int length;
+    int editing_index;
 } text_editor_values;
 
 void draw_board_process();
@@ -109,20 +111,29 @@ void draw_board_process();
 typedef struct _draw_board_values {
     int count;
     int cursor_point;
-    char *board;
+    char board[200];
 } draw_board_values;
 
 int int_to_four_digit(int value, int exponent);
 
 void set_fnd(int value);
-
+void set_lcd_text(char * string);
 void clock_output();
 
 void counter_output();
+
+void text_editor_output();
+
+void draw_board_output();
+
+void text_editor_map_setting();
+char next_value_map[130] = {0, };
+char start_text_map[10] ={0,};
 
 int fpga_switch_device;
 int hw_button_device;
 int fpga_fnd_device;
 int fpga_led_mmap;
+int fpga_lcd_device;
 #define DEBUG
 #endif //EMBEDDED_MAIN_H
