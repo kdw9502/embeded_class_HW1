@@ -22,7 +22,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <signal.h>
 #include <time.h>
 
 #include <sys/mman.h>
@@ -143,6 +143,10 @@ int fpga_fnd_device;
 int fpga_led_mmap;
 int fpga_lcd_device;
 int fpga_dot_device;
+
+// 종료를 위한 pid 저장
+int input_process_pid;
+int output_process_pid;
 
 unsigned char empty_dot_matrix[10] = {0,};
 #define DEBUG
