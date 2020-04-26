@@ -515,7 +515,7 @@ void draw_board_process()
     else if (button_addr[7] == True)
     {
         row = val->cursor_point / BOARD_COL;
-        if (col < BOARD_ROW - 1)
+        if (row < BOARD_ROW - 1)
             val->cursor_point += BOARD_COL;
     }
         // 현재 커서위치의 값 변경
