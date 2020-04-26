@@ -435,6 +435,12 @@ void draw_board_process()
     draw_board_values *val;
     val = (draw_board_values *) shmat(value_mid, (draw_board_values *) NULL, 0);
 
+    // 입력 버튼만큼 카운트 증가
+    for (i = 0; i < MAX_BUTTON; i++)
+    {
+        val->count += button_addr[i];
+    }
+
     // 전부 초기화
     if (button_addr[0] == True)
     {
@@ -494,14 +500,6 @@ void draw_board_process()
     {
         val->board[val->cursor_point] = 1 - val->board[val->cursor_point];
     }
-
-    // 입력 버튼만큼 카운트 증가
-    for (i = 0; i < MAX_BUTTON; i++)
-    {
-        val->count += button_addr[i];
-    }
-
-
 }
 
 void set_fnd(int value)
@@ -692,6 +690,7 @@ void draw_board_output()
     set_fnd(val->count);
     set_lcd_text(" ");
 
+    // char[row*col] 로 저장된 정보를 unsigned char[row] 로 변환
     int i, j;
     unsigned char num_matrix[10];
     for (i = 0; i < BOARD_ROW; i++)
@@ -699,10 +698,32 @@ void draw_board_output()
         unsigned char temp = 0;
         for (j = 0; j < BOARD_COL; ++j)
         {
-            temp += val->board[i*BOARD_COL + j] << (BOARD_COL - 1 - j);
+            temp += val->board[i * BOARD_COL + j] << (BOARD_COL - 1 - j);
         }
         num_matrix[i] = temp;
     }
+
+    // 1초마다 커서 표시
+    if (val->is_show_cursor == True)
+    {
+        int row, col;
+        unsigned char bit;
+        time_t now = time(NULL) + clockValues->bonus_time;
+
+        row = val->cursor_point / BOARD_COL;
+        col = val->cursor_point % BOARD_COL;
+        bit = 1 << (BOARD_COL - 1 - col);
+        // 커서 위치 led on
+        if (now % 2)
+        {
+            num_matrix[row] |= bit;
+        }
+        else // 커서 위치 led off
+        {
+            num_matrix[row] &= (0b1111111 - bit);
+        }
+    }
+
 
     set_dot_matrix(num_matrix);
 }
