@@ -471,6 +471,11 @@ void text_editor_output()
     write(fpga_lcd_device,str,MAX_BUFF);
 }
 
+void draw_board_output()
+{
+    
+}
+
 int main() {
     button_mid = shmget(IPC_PRIVATE, 50, IPC_CREAT | 0644);
     mode_mid = shmget(IPC_PRIVATE, 10, IPC_CREAT | 0644);
