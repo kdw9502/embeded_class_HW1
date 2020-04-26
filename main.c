@@ -464,19 +464,18 @@ void text_editor_output()
 {
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
-    char* str = val->string;
     unsigned char buffer[MAX_BUFF];
 
 
-    int len = strlen(str);
-    printf("text output string %s len %s\n", str,len);
+    int len = strlen(val->string);
+    printf("text output string %s len %s\n", val->string,len);
 
     if(len>0) {
-        strncat(buffer,str,len);
+        strncat(buffer,val->string,len);
         memset(buffer+len,' ',MAX_BUFF-len);
     }
 
-    write(fpga_lcd_device,str,MAX_BUFF);
+    write(fpga_lcd_device,val->string,MAX_BUFF);
 }
 
 void draw_board_output()
