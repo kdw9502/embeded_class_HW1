@@ -3,6 +3,7 @@
 void input_process()
 {
     printf("init input process\n");
+    // 디바이스 로드
     if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR | O_NONBLOCK)) == -1)
     {
         printf("Switch Device Open Error\n");
@@ -25,18 +26,22 @@ void main_process()
 {
     printf("init main process\n");
     int *mode_addr;
+
+    // 텍스트 에디터용 설정 초기화
     text_editor_map_setting();
 
     while (1)
     {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
+        // 모드가 변경되었을 때를 감지하여 초기값을 설정한다.
         if (mode_addr[0] >= MODE_CHANGED)
         {
             mode_addr[0] -= MODE_CHANGED;
             printf("mode changed : %d\n", mode_addr[0]);
             reset_value(mode_addr[0]);
         }
-//        printf("mode main:%d\n", mode_addr[0]);
+
+        // 현재 모드에 따라 연산한다.
         switch (mode_addr[0])
         {
             case CLOCK_MODE:
@@ -63,6 +68,7 @@ void output_process()
     printf("init output process\n");
     int *mode_addr;
 
+    // 디바이스 로드
     if ((fpga_led_mmap = open("/dev/mem", O_RDWR | O_SYNC)) == -1)
     {
         printf("led disabled\n");
@@ -93,6 +99,7 @@ void output_process()
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
 //        printf("output mode : %d",mode_addr[0]);
 
+        // 현재 모드에 따라 출력한다.
         switch (mode_addr[0])
         {
             case CLOCK_MODE:
@@ -109,13 +116,13 @@ void output_process()
                 break;
         }
         //shmdt(mode_addr);
-        usleep(DELAY * 2);
+        usleep(DELAY);
     }
 }
 
 void reset_value(int mode)
 {
-    // reset memory to 0
+    // 모드가 변경되었을 때, 각 모드에서 사용하는 정보를 초기화한다.
     int i, j;
     unsigned char *value_addr = (unsigned char *) shmat(value_mid, (unsigned char *) NULL, 0);
     memset(value_addr, 0, 1000);
@@ -173,7 +180,8 @@ void read_hw_key()
         return;
     }
 
-    if (ev[0].type == 1 && ev[0].value == 1) // on key press
+    // 키 입력에 따라 모드를 변경하고, 모드가 변경되었음을 알리는 MOD_CHANGED 를 더해준다.
+    if (ev[0].type == 1 && ev[0].value == 1)
     {
         if (ev[0].code == BACK_KEY_CODE)
         {
@@ -203,6 +211,7 @@ void read_fpga_key()
 
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
+    // push button device 에서 현재 눌린 버튼을 읽어와 저장한다.
     read(fpga_switch_device, &buffer, sizeof(buffer));
     for (i = 0; i < MAX_BUTTON; i++)
     {
@@ -227,9 +236,9 @@ void clock_process()
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
 
-
     if (button_addr[0] == 1)
     {
+        // 시간 수정 모드에서 1번 입력시 현재 시간 값을 시스템시간으로 설정하고 초기화한다.
         if (clockValues->editable == True)
         {
             clockValues->editable = False;
@@ -239,12 +248,14 @@ void clock_process()
             settimeofday(&timeval, NULL);
             clockValues->bonus_time = 0;
         }
+        // 수정 모드가 아닐 경우 수정모드로 진입한다.
         else
         {
             clockValues->editable = True;
         }
     }
 
+    // 시간을 더해주는 연산을 bonus_time 이라는 변수에 추가시간을 저장하여 구현했다.
     if (button_addr[1] == True && clockValues->editable)
         clockValues->bonus_time = 0;
 
@@ -258,6 +269,7 @@ void clock_process()
     //shmdt(clockValues);
 }
 
+// counter 모드에서 현재 진수의 다음 진수를 알기위한 배열, next_exp_map[2] 는 2진수 다음으로 설정될 진수를 나타낸다.
 unsigned char next_exp_map[11] = {0, 0, 10, 0, 2, 0, 0, 0, 4, 0, 8};
 
 void counter_process()
@@ -269,14 +281,17 @@ void counter_process()
 
     if (button_addr[0] == True)
     {
+        // 표기 진수 변경
         counterValues->exponent = next_exp_map[counterValues->exponent];
     }
     else if (button_addr[1] == True)
     {
+        // 현재 표기의 백의 자리 증가
         counterValues->value += counterValues->exponent * counterValues->exponent;
     }
     else if (button_addr[2] == True)
     {
+        // 현재 표기의 십의 자리 증가
         counterValues->value += counterValues->exponent;
     }
     else if (button_addr[3] == True)
@@ -291,9 +306,9 @@ void counter_process()
     //shmdt(counterValues);
 }
 
-
 void text_editor_map_setting()
 {
+    // 현재 입력중인 문자의 다음 값과 다른 버튼을 눌렀을 때 나올 첫 값에 대한 설정
     start_text_map[0] = '.';
     next_value_map['.'] = 'Q';
     next_value_map['Q'] = 'Z';
@@ -359,7 +374,6 @@ void text_editor_process()
     else if (button_addr[4] == True && button_addr[5] == True)
     {
         // 입력모드 변경
-        // swap 0, 1
         printf("swap text mode\n");
         val->is_letter_mode = 1 - val->is_letter_mode;
         val->prev_value = -1;
@@ -387,12 +401,14 @@ void text_editor_process()
                     printf("text %d pressed\n", i);
                     if (val->prev_value == i)
                     {
+                        // 이전에 눌렀던 스위치를 누를 경우 마지막 값을 변경
                         char now_editing_char = val->string[val->editing_index];
                         val->string[val->editing_index] = next_value_map[now_editing_char];
                         val->string[val->editing_index + 1] = '\0';
                     }
                     else
                     {
+                        // 이전에 눌렀던 스위치와 다른 스위치 입력시 새로운 문자 추가
                         val->editing_index++;
                         val->string[val->editing_index] = start_text_map[i];
                         val->string[val->editing_index + 1] = '\0';
@@ -470,7 +486,7 @@ void draw_board_process()
             }
         }
     }
-        // 상하좌우
+        // 상하좌우 커서 이동
     else if (button_addr[1] == True)
     {
         row = val->cursor_point / BOARD_COL;
@@ -495,13 +511,14 @@ void draw_board_process()
         if (col < BOARD_ROW - 1)
             val->cursor_point += BOARD_COL;
     }
-        // 5번 입력
+        // 현재 커서위치의 값 변경
     else if (button_addr[4] == True)
     {
         val->board[val->cursor_point] = 1 - val->board[val->cursor_point];
     }
 }
 
+// fnd에 표기될 값을 4자리 숫자를 파라미터로 호출하여 설정하는 함수
 void set_fnd(int value)
 {
     unsigned char data[4] = {0,};
@@ -516,6 +533,7 @@ void set_fnd(int value)
     read(fpga_fnd_device, &data, 4);
 }
 
+// value를 4자리 exponent 진수 표현으로 변환하여 반환하는 함수
 int int_to_four_digit(int value, int exponent)
 {
     int result = 0;
@@ -528,6 +546,7 @@ int int_to_four_digit(int value, int exponent)
     return result;
 }
 
+// 2진수 8자리 표현식으로 led 설정하는 함수
 void set_led(unsigned char binary_data)
 {
     unsigned long *fpga_addr = 0;
@@ -546,6 +565,7 @@ void set_led(unsigned char binary_data)
     *led_addr = binary_data;
 }
 
+// lcd 에 입력 string 출력
 void set_lcd_text(char *string)
 {
     unsigned char buffer[MAX_BUFF + 1];
@@ -559,12 +579,12 @@ void set_lcd_text(char *string)
     }
 
     write(fpga_lcd_device, buffer, MAX_BUFF);
-    set_dot_matrix(empty_dot_matrix);
 }
 
+// unsigned char[BOARD_ROW] 2진수 형식으로 dot matrix 설정
 void set_dot_matrix(unsigned char *num_matrix)
 {
-    write(fpga_dot_device, num_matrix, 10);
+    write(fpga_dot_device, num_matrix, BOARD_ROW);
 }
 
 void clock_output()
@@ -572,18 +592,22 @@ void clock_output()
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
     time_t now;
+
+    // clock_process 에서 추가된 bonus_time 만큼 시간 증가
     now = time(NULL) + clockValues->bonus_time;
     int hour = now / 3600 % 24;
     int min = now / 60 % 60;
 
     set_fnd(hour * 100 + min);
 
+    // led 설정
     if (clockValues->editable == False)
     {
         set_led(0b10000000);
     }
     else
     {
+        // 1초마다 3,4번 led점멸
         if (now % 2 == 1)
         {
             set_led(0b00100000);
@@ -606,9 +630,9 @@ void counter_output()
     int exp = values->exponent;
     int val = values->value;
 
-    char buffer[100];
     int fnd_val = 0;
 
+    // 진수에 따라 표기 변환 후 fnd에 표시
     if (exp == 10)
     {
         set_led(0b01000000);
@@ -633,6 +657,7 @@ void counter_output()
         set_fnd(fnd_val);
     }
     set_lcd_text(" ");
+    set_dot_matrix(empty_dot_matrix);
     //shmdt(values);
 }
 
@@ -643,12 +668,15 @@ void text_editor_output()
 
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
 
-    printf("text output string: %s len: %d editing: %d\n", val->string, strlen(val->string), val->editing_index);
+//    printf("text output string: %s len: %d editing: %d\n", val->string, strlen(val->string), val->editing_index);
+
+    // text_editor_process에서 변경된 텍스트를 읽어와 lcd에 표시
     strcpy(buffer, val->string);
 
     set_lcd_text(buffer);
     set_fnd(val->count);
 
+    // dot matrix에 입력모드 표시
     unsigned char num_matrix[10];
     if (val->is_letter_mode == True)
     {
@@ -730,6 +758,7 @@ void draw_board_output()
 
 int main()
 {
+    // 프로세스간 공유할 버튼,모드,값에 대한 공유메모리 넉넉하게 할당.
     button_mid = shmget(IPC_PRIVATE, 50, IPC_CREAT | 0644);
     mode_mid = shmget(IPC_PRIVATE, 10, IPC_CREAT | 0644);
     value_mid = shmget(IPC_PRIVATE, 1000, IPC_CREAT | 0644);
@@ -739,6 +768,7 @@ int main()
         exit(1);
     }
 
+    // 시작 모드 설정
     int *mode_addr;
     mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
     mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
