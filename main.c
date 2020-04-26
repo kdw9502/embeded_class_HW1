@@ -122,7 +122,7 @@ void reset_value(int mode) {
             c->is_letter_mode = True;
             c->prev_value = -1;
             c->string[0] = '\0';
-            c->editing_index = 0;
+            c->editing_index = -1;
             break;
         case DRAW_MODE:
             d = (draw_board_values *) value_addr;
@@ -305,7 +305,7 @@ void text_editor_process() {
         printf("reset text\n");
         val->string[0] = '\0';
         val->prev_value = -1;
-        val->editing_index = 0;
+        val->editing_index = -1;
     } else if (button_addr[4] == True && button_addr[5] == True){
         // 입력모드 변경
         // swap 0, 1
@@ -481,15 +481,16 @@ void counter_output() {
 
 void text_editor_output()
 {
-    printf("1\n");
+
     char buffer[MAX_BUFF+1];
     text_editor_values *val;
-    printf("2\n");
+
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
-    printf("3\n");
+
+    printf("text output string: %s len: %d editing: %d\n", val->string,strlen(val->string), val->editing_index);
     strcpy(buffer, val->string);
-    printf("4\n");
-    printf("text output string: %s len: %d editing: %d", val->string,strlen(val->string), val->editing_index);
+
+
 
     set_lcd_text(buffer);
     set_fnd(val->count);
