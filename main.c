@@ -484,8 +484,8 @@ void text_editor_output()
     char buffer[MAX_BUFF+1];
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
-
     strcpy(buffer, val->string);
+    printf("text output string: %s len: %d editing: %d", val->string,strlen(val->string), val->editing_index);
 
     set_lcd_text(buffer);
     set_fnd(val->count);
