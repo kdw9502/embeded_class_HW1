@@ -414,12 +414,13 @@ void set_led(unsigned char binary_data) {
 
 void set_lcd_text(char * string)
 {
+    unsigned char buffer[MAX_BUFF];
     int len = strlen(string);
+    memset(buffer, ' ',MAX_BUFF);
     printf("text output string: %s len %d\n", string,len);
 
     if(len>0) {
         strncat(buffer,string,len);
-        memset(buffer+len,' ',MAX_BUFF-len);
     }
 
     write(fpga_lcd_device, string, MAX_BUFF);
@@ -481,7 +482,6 @@ void text_editor_output()
 {
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
-    unsigned char buffer[MAX_BUFF];
 
     set_lcd_text(val->string);
     set_fnd(val->count);
