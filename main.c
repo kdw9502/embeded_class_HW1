@@ -26,6 +26,7 @@ void main_process() {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
         if (mode_addr[0] >= MODE_CHANGED) {
             mode_addr[0] -= MODE_CHANGED;
+            printf("mode changed : %d", mode_addr[0]);
             reset_value(mode_addr[0]);
         }
 //        printf("mode main:%d\n", mode_addr[0]);
@@ -473,7 +474,7 @@ void text_editor_output()
 
 void draw_board_output()
 {
-    
+
 }
 
 int main() {
