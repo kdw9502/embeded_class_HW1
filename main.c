@@ -253,7 +253,7 @@ void clock_process()
             settimeofday(&timeval, NULL);
             clockValues->bonus_time = 0;
         }
-        // 수정 모드가 아닐 경우 수정모드로 진입한다.
+            // 수정 모드가 아닐 경우 수정모드로 진입한다.
         else
         {
             clockValues->editable = True;
@@ -780,7 +780,7 @@ int main()
     //shmdt(mode_addr);
 
     int pid;
-    switch ((pid=fork())
+    switch ((pid = fork()))
     {
         case -1: //fail
             perror("fork");
