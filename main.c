@@ -414,7 +414,7 @@ void set_led(unsigned char binary_data) {
 
 void set_lcd_text(char * string)
 {
-    unsigned char buffer[MAX_BUFF*2+1];
+    unsigned char buffer[MAX_BUFF+1];
     int len = strlen(string);
 
     memset(buffer, ' ',MAX_BUFF+1);
