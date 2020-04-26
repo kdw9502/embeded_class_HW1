@@ -314,9 +314,10 @@ void text_editor_process() {
     } else if (button_addr[7] == True && button_addr[8] == True){
         // 한칸 띄우기
         printf("text spacing\n");
+        val->editing_index++;
         val->string[val->editing_index] = ' ';
         val->string[val->editing_index + 1] = '\0';
-        val->editing_index++;
+
         val->prev_value = -1;
     } else{
         // 일반 입력
@@ -468,7 +469,7 @@ void text_editor_output()
 
 
     int len = strlen(val->string);
-    printf("text output string %s len %s\n", val->string,len);
+    printf("text output string %s len %s editing %d\n", val->string,len, val->editing_index);
 
     if(len>0) {
         strncat(buffer,val->string,len);
