@@ -298,6 +298,7 @@ void text_editor_process() {
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
     char temp;
+    int i;
 
     if (button_addr[1] == True && button_addr[2] == True) {
         //초기화
@@ -346,7 +347,7 @@ void text_editor_process() {
     }
 
     // 입력 버튼만큼 카운트 증가
-    for (int i=0;i<MAX_BUTTON; i++)
+    for (i=0;i<MAX_BUTTON; i++)
     {
         val->count += button_addr[i];
     }
