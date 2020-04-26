@@ -699,7 +699,7 @@ void draw_board_output()
         unsigned char temp = 0;
         for (j = 0; j < BOARD_COL; ++j)
         {
-            temp += val->board[j] << (BOARD_COL - 1 - j);
+            temp += val->board[i*BOARD_COL + j] << (BOARD_COL - 1 - j);
         }
         num_matrix[i] = temp;
     }
