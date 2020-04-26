@@ -152,8 +152,8 @@ void reset_value(int mode)
             d->count = 0;
             d->cursor_point = 0;
             d->is_show_cursor = True;
-            for (int i = 0; i < 10; i++)
-                for (int j = 0; j < 7; j++)
+            for (i = 0; i < BOARD_ROW; i++)
+                for (j = 0; j < BOARD_COL; j++)
                     d->board[i][j] = 0;
             break;
     }
