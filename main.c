@@ -69,6 +69,11 @@ void output_process() {
         return;
     }
 
+    if ((fpga_dot_device = open("/dev/fpga_dot", O_WRONLY)) == -1) {
+        printf("dot matrix disalbed\n");
+        return;
+    }
+
 
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
@@ -419,7 +424,7 @@ void set_lcd_text(char *string) {
 }
 
 void set_dot_matrix(unsigned char *num_matrix) {
-    write(dev, num_matrix, 10);
+    write(fpga_dot_device, num_matrix, 10);
 }
 
 void clock_output() {
@@ -442,7 +447,7 @@ void clock_output() {
         }
     }
     set_lcd_text(" ");
-    unsigned char dot[10] ={0,};
+    unsigned char dot[10] = {0,};
     set_dot_matrix(empty_dot_matrix);
     //shmdt(clockValues);
 }
@@ -490,8 +495,7 @@ void text_editor_output() {
     set_fnd(val->count);
 
     unsigned char num_matrix[10];
-    if (val->is_letter_mode == True)
-    {
+    if (val->is_letter_mode == True) {
         // A
         num_matrix[0] = 0b0011100;
         num_matrix[1] = 0b0110110;
@@ -503,8 +507,7 @@ void text_editor_output() {
         num_matrix[7] = 0b1100011;
         num_matrix[8] = 0b1100011;
         num_matrix[9] = 0b1100011;
-    }
-    else{
+    } else {
         // 1
         num_matrix[0] = 0b0001100;
         num_matrix[1] = 0b0011100;
