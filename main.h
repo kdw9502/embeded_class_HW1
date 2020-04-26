@@ -113,7 +113,7 @@ void draw_board_process();
 typedef struct _draw_board_values {
     int count;
     int cursor_point;
-    unsigned char board[70];
+    unsigned char board[BOARD_ROW * BOARD_COL];
     char is_show_cursor;
 } draw_board_values;
 
