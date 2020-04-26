@@ -154,7 +154,7 @@ void reset_value(int mode)
             d->is_show_cursor = True;
             for (i = 0; i < BOARD_ROW; i++)
                 for (j = 0; j < BOARD_COL; j++)
-                    d->board[i][j] = 0;
+                    d->board[i * BOARD_COL + j] = 0;
             break;
     }
     //shmdt(value_addr);
@@ -443,17 +443,17 @@ void draw_board_process()
         val->cursor_point = 0;
         val->is_show_cursor = True;
     }
-    // 커서 깜박임 제어
+        // 커서 깜박임 제어
     else if (button_addr[2] == True)
     {
         val->is_show_cursor = 1 - val->is_show_cursor;
     }
-    // 그림만 초기화
+        // 그림만 초기화
     else if (button_addr[6] == True)
     {
         memset(val->board, False, BOARD_ROW * BOARD_COL);
     }
-    // 그림 반전
+        // 그림 반전
     else if (button_addr[8] == True)
     {
         for (i = 0; i < BOARD_ROW; i++)
@@ -464,7 +464,7 @@ void draw_board_process()
             }
         }
     }
-    // 상하좌우
+        // 상하좌우
     else if (button_addr[1] == True)
     {
         row = val->cursor_point / BOARD_COL;
@@ -489,7 +489,7 @@ void draw_board_process()
         if (col < BOARD_ROW - 1)
             val->cursor_point += BOARD_COL;
     }
-    // 5번 입력
+        // 5번 입력
     else if (button_addr[4] == True)
     {
         val->board[val->cursor_point] = 1 - val->board[val->cursor_point];
@@ -692,11 +692,11 @@ void draw_board_output()
     set_fnd(val->count);
     set_lcd_text(" ");
 
-    int i,j;
+    int i, j;
     unsigned char num_matrix[10];
-    for (i = 0;i<BOARD_ROW;i++)
+    for (i = 0; i < BOARD_ROW; i++)
     {
-        unsigned char temp =0;
+        unsigned char temp = 0;
         for (j = 0; j < BOARD_COL; ++j)
         {
             temp += val->board[j] << (BOARD_COL - 1 - j);
