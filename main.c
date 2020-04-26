@@ -708,7 +708,7 @@ void draw_board_output()
     {
         int row, col;
         unsigned char bit;
-        time_t now = time(NULL) + clockValues->bonus_time;
+        time_t now = time(NULL);
 
         row = val->cursor_point / BOARD_COL;
         col = val->cursor_point % BOARD_COL;
