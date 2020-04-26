@@ -64,6 +64,9 @@
 
 #define MAX_BUFF 32
 
+#define BOARD_COL 7
+#define BOARD_ROW 10
+
 int button_mid, mode_mid, value_mid;
 
 void input_process();
@@ -108,7 +111,8 @@ void draw_board_process();
 typedef struct _draw_board_values {
     int count;
     int cursor_point;
-    char board[200];
+    unsigned char board[70];
+    char is_show_cursor;
 } draw_board_values;
 
 int int_to_four_digit(int value, int exponent);

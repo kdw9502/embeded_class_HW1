@@ -1,36 +1,44 @@
 #include "main.h"
 
-void input_process() {
+void input_process()
+{
     printf("init input process\n");
-    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR | O_NONBLOCK)) == -1) {
+    if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR | O_NONBLOCK)) == -1)
+    {
         printf("Switch Device Open Error\n");
 //        return;
     }
-    if ((hw_button_device = open("/dev/input/event0", O_RDONLY | O_NONBLOCK)) == -1) {
+    if ((hw_button_device = open("/dev/input/event0", O_RDONLY | O_NONBLOCK)) == -1)
+    {
         printf("Hardware key Device Open Error\n");
 //        return;
     }
-    while (1) {
+    while (1)
+    {
         read_hw_key(mode_mid);
         read_fpga_key(button_mid);
         usleep(DELAY);
     }
 }
 
-void main_process() {
+void main_process()
+{
     printf("init main process\n");
     int *mode_addr;
     text_editor_map_setting();
 
-    while (1) {
+    while (1)
+    {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
-        if (mode_addr[0] >= MODE_CHANGED) {
+        if (mode_addr[0] >= MODE_CHANGED)
+        {
             mode_addr[0] -= MODE_CHANGED;
             printf("mode changed : %d\n", mode_addr[0]);
             reset_value(mode_addr[0]);
         }
 //        printf("mode main:%d\n", mode_addr[0]);
-        switch (mode_addr[0]) {
+        switch (mode_addr[0])
+        {
             case CLOCK_MODE:
                 clock_process();
                 break;
@@ -50,36 +58,43 @@ void main_process() {
     }
 }
 
-void output_process() {
+void output_process()
+{
     printf("init output process\n");
     int *mode_addr;
 
-    if ((fpga_led_mmap = open("/dev/mem", O_RDWR | O_SYNC)) == -1) {
+    if ((fpga_led_mmap = open("/dev/mem", O_RDWR | O_SYNC)) == -1)
+    {
         printf("led disabled\n");
         return;
     }
 
-    if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1) {
+    if ((fpga_fnd_device = open("/dev/fpga_fnd", O_RDWR)) == -1)
+    {
         printf("fnd disabled\n");
         return;
     }
 
-    if ((fpga_lcd_device = open("/dev/fpga_text_lcd", O_WRONLY)) == -1) {
+    if ((fpga_lcd_device = open("/dev/fpga_text_lcd", O_WRONLY)) == -1)
+    {
         printf("lcd disabled\n");
         return;
     }
 
-    if ((fpga_dot_device = open("/dev/fpga_dot", O_WRONLY)) == -1) {
+    if ((fpga_dot_device = open("/dev/fpga_dot", O_WRONLY)) == -1)
+    {
         printf("dot matrix disalbed\n");
         return;
     }
 
 
-    while (1) {
+    while (1)
+    {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
 //        printf("output mode : %d",mode_addr[0]);
 
-        switch (mode_addr[0]) {
+        switch (mode_addr[0])
+        {
             case CLOCK_MODE:
                 clock_output();
                 break;
@@ -98,8 +113,10 @@ void output_process() {
     }
 }
 
-void reset_value(int mode) {
+void reset_value(int mode)
+{
     // reset memory to 0
+    int i, j;
     unsigned char *value_addr = (unsigned char *) shmat(value_mid, (unsigned char *) NULL, 0);
     memset(value_addr, 0, 1000);
 
@@ -107,7 +124,8 @@ void reset_value(int mode) {
     counter_values *b;
     text_editor_values *c;
     draw_board_values *d;
-    switch (mode) {
+    switch (mode)
+    {
         case CLOCK_MODE:
 //            printf("reset to clock");
             a = (clock_values *) value_addr;
@@ -133,30 +151,40 @@ void reset_value(int mode) {
             d = (draw_board_values *) value_addr;
             d->count = 0;
             d->cursor_point = 0;
-            d->board[0] = '\0';
+            d->is_show_cursor = True;
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 7; j++)
+                    d->board[i][j] = 0;
             break;
     }
     //shmdt(value_addr);
 }
 
-void read_hw_key() {
+void read_hw_key()
+{
     char *device = "/dev/input/event0";
     int *mode;
     struct input_event ev[BUFF_SIZE];
     int rd, size = sizeof(struct input_event);
     mode = (int *) shmat(mode_mid, (int *) NULL, 0);
 
-    if ((rd = read(hw_button_device, ev, size * BUFF_SIZE)) < size) {
+    if ((rd = read(hw_button_device, ev, size * BUFF_SIZE)) < size)
+    {
         return;
     }
 
     if (ev[0].type == 1 && ev[0].value == 1) // on key press
     {
-        if (ev[0].code == BACK_KEY_CODE) {
+        if (ev[0].code == BACK_KEY_CODE)
+        {
             mode[0] = EXIT;
-        } else if (ev[0].code == VOLUME_UP) {
+        }
+        else if (ev[0].code == VOLUME_UP)
+        {
             mode[0] = (mode[0] + 1) % MODE_COUNT + MODE_CHANGED;
-        } else if (ev[0].code == VOLUME_DOWN) {
+        }
+        else if (ev[0].code == VOLUME_DOWN)
+        {
             mode[0] = (mode[0] + MODE_COUNT - 1) % MODE_COUNT + MODE_CHANGED;
         }
     }
@@ -166,7 +194,8 @@ void read_hw_key() {
     //shmdt(mode);
 }
 
-void read_fpga_key() {
+void read_fpga_key()
+{
     int i;
     int buff_size;
     unsigned char *button_addr;
@@ -175,7 +204,8 @@ void read_fpga_key() {
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
 
     read(fpga_switch_device, &buffer, sizeof(buffer));
-    for (i = 0; i < MAX_BUTTON; i++) {
+    for (i = 0; i < MAX_BUTTON; i++)
+    {
         button_addr[i] = buffer[i];
     }
 
@@ -189,7 +219,8 @@ void read_fpga_key() {
     //shmdt(button_addr);
 }
 
-void clock_process() {
+void clock_process()
+{
     struct timeval timeval;
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
@@ -197,15 +228,19 @@ void clock_process() {
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
 
 
-    if (button_addr[0] == 1) {
-        if (clockValues->editable == True) {
+    if (button_addr[0] == 1)
+    {
+        if (clockValues->editable == True)
+        {
             clockValues->editable = False;
 
             gettimeofday(&timeval, NULL);
             timeval.tv_sec += clockValues->bonus_time;
             settimeofday(&timeval, NULL);
             clockValues->bonus_time = 0;
-        } else {
+        }
+        else
+        {
             clockValues->editable = True;
         }
     }
@@ -225,19 +260,27 @@ void clock_process() {
 
 unsigned char next_exp_map[11] = {0, 0, 10, 0, 2, 0, 0, 0, 4, 0, 8};
 
-void counter_process() {
+void counter_process()
+{
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     counter_values *counterValues;
     counterValues = (counter_values *) shmat(value_mid, (counter_values *) NULL, 0);
 
-    if (button_addr[0] == True) {
+    if (button_addr[0] == True)
+    {
         counterValues->exponent = next_exp_map[counterValues->exponent];
-    } else if (button_addr[1] == True) {
+    }
+    else if (button_addr[1] == True)
+    {
         counterValues->value += counterValues->exponent * counterValues->exponent;
-    } else if (button_addr[2] == True) {
+    }
+    else if (button_addr[2] == True)
+    {
         counterValues->value += counterValues->exponent;
-    } else if (button_addr[3] == True) {
+    }
+    else if (button_addr[3] == True)
+    {
         counterValues->value += 1;
     }
 
@@ -249,7 +292,8 @@ void counter_process() {
 }
 
 
-void text_editor_map_setting() {
+void text_editor_map_setting()
+{
     start_text_map[0] = '.';
     next_value_map['.'] = 'Q';
     next_value_map['Q'] = 'Z';
@@ -296,26 +340,32 @@ void text_editor_map_setting() {
     next_value_map['Y'] = 'W';
 }
 
-void text_editor_process() {
+void text_editor_process()
+{
     unsigned char *button_addr;
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
     int i;
 
-    if (button_addr[1] == True && button_addr[2] == True) {
+    if (button_addr[1] == True && button_addr[2] == True)
+    {
         //초기화
         printf("reset text\n");
         val->string[0] = '\0';
         val->prev_value = -1;
         val->editing_index = -1;
-    } else if (button_addr[4] == True && button_addr[5] == True) {
+    }
+    else if (button_addr[4] == True && button_addr[5] == True)
+    {
         // 입력모드 변경
         // swap 0, 1
         printf("swap text mode\n");
         val->is_letter_mode = 1 - val->is_letter_mode;
         val->prev_value = -1;
-    } else if (button_addr[7] == True && button_addr[8] == True) {
+    }
+    else if (button_addr[7] == True && button_addr[8] == True)
+    {
         // 한칸 띄우기
         printf("text spacing\n");
         val->editing_index++;
@@ -323,18 +373,26 @@ void text_editor_process() {
         val->string[val->editing_index + 1] = '\0';
 
         val->prev_value = -1;
-    } else {
+    }
+    else
+    {
         // 일반 입력
-        for (i = 0; i < MAX_BUTTON; i++) {
-            if (button_addr[i] == True) {
+        for (i = 0; i < MAX_BUTTON; i++)
+        {
+            if (button_addr[i] == True)
+            {
                 // 문자열 모드
-                if (val->is_letter_mode == True) {
+                if (val->is_letter_mode == True)
+                {
                     printf("text %d pressed\n", i);
-                    if (val->prev_value == i) {
+                    if (val->prev_value == i)
+                    {
                         char now_editing_char = val->string[val->editing_index];
                         val->string[val->editing_index] = next_value_map[now_editing_char];
                         val->string[val->editing_index + 1] = '\0';
-                    } else {
+                    }
+                    else
+                    {
                         val->editing_index++;
                         val->string[val->editing_index] = start_text_map[i];
                         val->string[val->editing_index + 1] = '\0';
@@ -342,7 +400,8 @@ void text_editor_process() {
                     val->prev_value = i;
                 }
                     //숫자모드
-                else {
+                else
+                {
                     printf("digit %d pressed\n", i);
                     val->prev_value = -1;
                     val->editing_index++;
@@ -354,22 +413,99 @@ void text_editor_process() {
     }
 
     // 입력 버튼만큼 카운트 증가
-    for (i = 0; i < MAX_BUTTON; i++) {
+    for (i = 0; i < MAX_BUTTON; i++)
+    {
         val->count += button_addr[i];
     }
 
     // 입력 영역 초과시 한칸 앞으로
-    if (strlen(val->string) > MAX_BUFF) {
+    if (strlen(val->string) > MAX_BUFF)
+    {
         strcpy(val->string, val->string + 1);
         val->editing_index--;
     }
 }
 
-void draw_board_process() {
+void draw_board_process()
+{
+    int i, j;
+    int row, col;
+    unsigned char *button_addr;
+    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
+    draw_board_values *val;
+    val = (draw_board_values *) shmat(value_mid, (draw_board_values *) NULL, 0);
+
+    // 전부 초기화
+    if (button_addr[0] == True)
+    {
+        memset(val->board, False, BOARD_ROW * BOARD_COL);
+        val->count = 0;
+        val->cursor_point = 0;
+        val->is_show_cursor = True;
+    }
+    // 커서 깜박임 제어
+    else if (button_addr[2] == True)
+    {
+        val->is_show_cursor = 1 - val->is_show_cursor;
+    }
+    // 그림만 초기화
+    else if (button_addr[6] == True)
+    {
+        memset(val->board, False, BOARD_ROW * BOARD_COL);
+    }
+    // 그림 반전
+    else if (button_addr[8] == True)
+    {
+        for (i = 0; i < BOARD_ROW; i++)
+        {
+            for (j = 0; j < BOARD_COL; ++j)
+            {
+                val->board[i * BOARD_COL + j] = 1 - val->board[i * BOARD_COL + j];
+            }
+        }
+    }
+    // 상하좌우
+    else if (button_addr[1] == True)
+    {
+        row = val->cursor_point / BOARD_COL;
+        if (row > 0)
+            val->cursor_point -= BOARD_COL;
+    }
+    else if (button_addr[3] == True)
+    {
+        col = val->cursor_point % BOARD_COL;
+        if (col > 0)
+            val->cursor_point -= 1;
+    }
+    else if (button_addr[5] == True)
+    {
+        col = val->cursor_point % BOARD_COL;
+        if (col < BOARD_COL - 1)
+            val->cursor_point += 1;
+    }
+    else if (button_addr[7] == True)
+    {
+        row = val->cursor_point / BOARD_COL;
+        if (col < BOARD_ROW - 1)
+            val->cursor_point += BOARD_COL;
+    }
+    // 5번 입력
+    else if (button_addr[4] == True)
+    {
+        val->board[val->cursor_point] = 1 - val->board[val->cursor_point];
+    }
+
+    // 입력 버튼만큼 카운트 증가
+    for (i = 0; i < MAX_BUTTON; i++)
+    {
+        val->count += button_addr[i];
+    }
+
 
 }
 
-void set_fnd(int value) {
+void set_fnd(int value)
+{
     unsigned char data[4] = {0,};
 
     data[0] = value / 1000 % 10;
@@ -382,7 +518,8 @@ void set_fnd(int value) {
     read(fpga_fnd_device, &data, 4);
 }
 
-int int_to_four_digit(int value, int exponent) {
+int int_to_four_digit(int value, int exponent)
+{
     int result = 0;
 
     result += value / (exponent * exponent * exponent) % exponent * 1000;
@@ -393,12 +530,14 @@ int int_to_four_digit(int value, int exponent) {
     return result;
 }
 
-void set_led(unsigned char binary_data) {
+void set_led(unsigned char binary_data)
+{
     unsigned long *fpga_addr = 0;
     unsigned char *led_addr = 0;
     fpga_addr = (unsigned long *) mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fpga_led_mmap,
                                        FPGA_BASE_ADDRESS);
-    if (fpga_addr == MAP_FAILED) {
+    if (fpga_addr == MAP_FAILED)
+    {
         printf("mmap error!\n");
         close(fpga_led_mmap);
         return;
@@ -409,13 +548,15 @@ void set_led(unsigned char binary_data) {
     *led_addr = binary_data;
 }
 
-void set_lcd_text(char *string) {
+void set_lcd_text(char *string)
+{
     unsigned char buffer[MAX_BUFF + 1];
     int len = strlen(string);
 
     memset(buffer, ' ', MAX_BUFF + 1);
 
-    if (len > 0) {
+    if (len > 0)
+    {
         strncpy(buffer, string, len);
     }
 
@@ -423,11 +564,13 @@ void set_lcd_text(char *string) {
     set_dot_matrix(empty_dot_matrix);
 }
 
-void set_dot_matrix(unsigned char *num_matrix) {
+void set_dot_matrix(unsigned char *num_matrix)
+{
     write(fpga_dot_device, num_matrix, 10);
 }
 
-void clock_output() {
+void clock_output()
+{
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
     time_t now;
@@ -437,12 +580,18 @@ void clock_output() {
 
     set_fnd(hour * 100 + min);
 
-    if (clockValues->editable == False) {
+    if (clockValues->editable == False)
+    {
         set_led(0b10000000);
-    } else {
-        if (now % 2 == 1) {
+    }
+    else
+    {
+        if (now % 2 == 1)
+        {
             set_led(0b00100000);
-        } else {
+        }
+        else
+        {
             set_led(0b00010000);
         }
     }
@@ -452,7 +601,8 @@ void clock_output() {
     //shmdt(clockValues);
 }
 
-void counter_output() {
+void counter_output()
+{
     counter_values *values;
     values = (counter_values *) shmat(value_mid, (counter_values *) NULL, 0);
     int exp = values->exponent;
@@ -461,18 +611,25 @@ void counter_output() {
     char buffer[100];
     int fnd_val = 0;
 
-    if (exp == 10) {
+    if (exp == 10)
+    {
         set_led(0b01000000);
         set_fnd(val % 1000);
-    } else if (exp == 2) {
+    }
+    else if (exp == 2)
+    {
         set_led(0b10000000);
         fnd_val = int_to_four_digit(val, 2);
         set_fnd(fnd_val);
-    } else if (exp == 4) {
+    }
+    else if (exp == 4)
+    {
         set_led(0b00010000);
         fnd_val = int_to_four_digit(val, 4);
         set_fnd(fnd_val);
-    } else if (exp == 8) {
+    }
+    else if (exp == 8)
+    {
         set_led(0b00100000);
         fnd_val = int_to_four_digit(val, 8);
         set_fnd(fnd_val);
@@ -481,8 +638,8 @@ void counter_output() {
     //shmdt(values);
 }
 
-void text_editor_output() {
-
+void text_editor_output()
+{
     char buffer[MAX_BUFF + 1];
     text_editor_values *val;
 
@@ -495,7 +652,8 @@ void text_editor_output() {
     set_fnd(val->count);
 
     unsigned char num_matrix[10];
-    if (val->is_letter_mode == True) {
+    if (val->is_letter_mode == True)
+    {
         // A
         num_matrix[0] = 0b0011100;
         num_matrix[1] = 0b0110110;
@@ -507,7 +665,9 @@ void text_editor_output() {
         num_matrix[7] = 0b1100011;
         num_matrix[8] = 0b1100011;
         num_matrix[9] = 0b1100011;
-    } else {
+    }
+    else
+    {
         // 1
         num_matrix[0] = 0b0001100;
         num_matrix[1] = 0b0011100;
@@ -524,15 +684,36 @@ void text_editor_output() {
 }
 
 
-void draw_board_output() {
+void draw_board_output()
+{
+    draw_board_values *val;
+    val = (draw_board_values *) shmat(value_mid, (draw_board_values *) NULL, 0);
 
+    set_fnd(val->count);
+    set_lcd_text(" ");
+
+    int i,j;
+    unsigned char num_matrix[10];
+    for (i = 0;i<BOARD_ROW;i++)
+    {
+        unsigned char temp =0;
+        for (j = 0; j < BOARD_COL; ++j)
+        {
+            temp += val->board[j] << (BOARD_COL - 1 - j);
+        }
+        num_matrix[i] = temp;
+    }
+
+    set_dot_matrix(num_matrix);
 }
 
-int main() {
+int main()
+{
     button_mid = shmget(IPC_PRIVATE, 50, IPC_CREAT | 0644);
     mode_mid = shmget(IPC_PRIVATE, 10, IPC_CREAT | 0644);
     value_mid = shmget(IPC_PRIVATE, 1000, IPC_CREAT | 0644);
-    if (button_mid == -1 || mode_mid == -1 || value_mid == -1) {
+    if (button_mid == -1 || mode_mid == -1 || value_mid == -1)
+    {
         perror("shmget");
         exit(1);
     }
@@ -542,7 +723,8 @@ int main() {
     mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
     //shmdt(mode_addr);
 
-    switch (fork()) {
+    switch (fork())
+    {
         case -1: //fail
             perror("fork");
             exit(1);
@@ -551,7 +733,8 @@ int main() {
             input_process();
             break;
         default: //parent
-            switch (fork()) {
+            switch (fork())
+            {
                 case -1: //fail
                     perror("second fork");
                     exit(1);
