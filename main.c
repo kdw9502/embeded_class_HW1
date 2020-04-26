@@ -469,7 +469,7 @@ void text_editor_output()
         memset(buffer+len,' ',MAX_BUFF-len);
     }
 
-    write(fpga_lcd_device,string,MAX_BUFF);
+    write(fpga_lcd_device,str,MAX_BUFF);
 }
 
 int main() {
