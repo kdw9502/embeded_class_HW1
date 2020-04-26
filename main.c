@@ -464,7 +464,7 @@ void text_editor_output()
 
     int len = strlen(str);
 
-    if(str_size>0) {
+    if(len>0) {
         strncat(buffer,str,len);
         memset(buffer+len,' ',MAX_BUFF-len);
     }
