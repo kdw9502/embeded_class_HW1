@@ -48,7 +48,7 @@
 #define MAIN_SEQ 1
 #define OUTPUT_SEQ 2
 
-#define DELAY 300000
+#define DELAY 200000
 
 #define MAX_BUTTON 9
 
