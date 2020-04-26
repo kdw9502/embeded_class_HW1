@@ -44,10 +44,7 @@
 #define DRAW_MODE 3
 #define MODE_COUNT 4
 
-#define INPUT_SEQ 0
-#define MAIN_SEQ 1
-#define OUTPUT_SEQ 2
-
+// input output main process의 실행 주기
 #define DELAY 200000
 
 #define MAX_BUTTON 9
@@ -55,8 +52,10 @@
 #define False 0
 #define True 1
 
+// 모드 변경되었음을 구분하기위한 큰 수
 #define MODE_CHANGED 100
 
+// 모든 프로세스 종료를 위한 모드 플래그
 #define EXIT -1
 
 #define FPGA_BASE_ADDRESS 0x08000000 //fpga_base address
@@ -82,6 +81,7 @@ void reset_value(int mode);
 
 void clock_process();
 
+// clock 모드에서 사용할 값들
 typedef struct _clock_values {
     int time;
     int bonus_time;
@@ -91,6 +91,7 @@ typedef struct _clock_values {
 
 void counter_process();
 
+// counter 모드에서 사용할 값들
 typedef struct _counter_values {
     int exponent;
     int value;
@@ -98,6 +99,7 @@ typedef struct _counter_values {
 
 void text_editor_process();
 
+// text_editor 모드에서 사용할 값들
 typedef struct _text_editor_values {
     int count;
     char is_letter_mode;
@@ -108,6 +110,7 @@ typedef struct _text_editor_values {
 
 void draw_board_process();
 
+// draw_board 모드에서 사용할 값들
 typedef struct _draw_board_values {
     int count;
     int cursor_point;
@@ -117,6 +120,7 @@ typedef struct _draw_board_values {
 
 int int_to_four_digit(int value, int exponent);
 
+// device control 을 위한 래퍼
 void set_fnd(int value);
 void set_lcd_text(char *string);
 void set_dot_matrix(unsigned char *num_matrix);
@@ -128,9 +132,11 @@ void draw_board_output();
 
 void text_editor_map_setting();
 
+// text editor 설정을 위한 배열
 char next_value_map[130] = {0,};
 char start_text_map[10] = {0,};
 
+// 디바이스의 fd를 저장할 변수들
 int fpga_switch_device;
 int hw_button_device;
 int fpga_fnd_device;
