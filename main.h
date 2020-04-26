@@ -48,7 +48,7 @@
 #define MAIN_SEQ 1
 #define OUTPUT_SEQ 2
 
-#define DELAY 200000
+#define DELAY 300000
 
 #define MAX_BUTTON 9
 
@@ -117,7 +117,7 @@ typedef struct _draw_board_values {
 int int_to_four_digit(int value, int exponent);
 
 void set_fnd(int value);
-
+void set_lcd_text(char * string);
 void clock_output();
 
 void counter_output();

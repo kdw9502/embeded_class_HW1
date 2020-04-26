@@ -305,6 +305,7 @@ void text_editor_process() {
         printf("reset text\n");
         val->string[0] = '\0';
         val->prev_value = -1;
+        val->editing_index = 0;
     } else if (button_addr[4] == True && button_addr[5] == True){
         // 입력모드 변경
         // swap 0, 1
@@ -411,6 +412,19 @@ void set_led(unsigned char binary_data) {
     *led_addr = binary_data;
 }
 
+void set_lcd_text(char * string)
+{
+    int len = strlen(string);
+    printf("text output string: %s len %d\n", string,len);
+
+    if(len>0) {
+        strncat(buffer,string,len);
+        memset(buffer+len,' ',MAX_BUFF-len);
+    }
+
+    write(fpga_lcd_device,val->string,MAX_BUFF);
+}
+
 void clock_output() {
     clock_values *clockValues;
     clockValues = (clock_values *) shmat(value_mid, (clock_values *) NULL, 0);
@@ -430,6 +444,7 @@ void clock_output() {
             set_led(0b00010000);
         }
     }
+    set_lcd_text(" ");
     //shmdt(clockValues);
 }
 
@@ -458,6 +473,7 @@ void counter_output() {
         fnd_val = int_to_four_digit(val, 8);
         set_fnd(fnd_val);
     }
+    set_lcd_text(" ");
     //shmdt(values);
 }
 
@@ -467,17 +483,11 @@ void text_editor_output()
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
     unsigned char buffer[MAX_BUFF];
 
-
-    int len = strlen(val->string);
-    printf("text output string: %s len %d editing %d\n", val->string,len, val->editing_index);
-
-    if(len>0) {
-        strncat(buffer,val->string,len);
-        memset(buffer+len,' ',MAX_BUFF-len);
-    }
-
-    write(fpga_lcd_device,val->string,MAX_BUFF);
+    set_lcd_text(val->string);
+    set_fnd(val->count);
 }
+
+
 
 void draw_board_output()
 {
