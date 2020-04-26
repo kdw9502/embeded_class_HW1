@@ -83,7 +83,6 @@ void clock_process();
 
 // clock 모드에서 사용할 값들
 typedef struct _clock_values {
-    int time;
     int bonus_time;
     int editable;
 } clock_values;

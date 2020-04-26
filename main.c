@@ -141,9 +141,7 @@ void reset_value(int mode)
     switch (mode)
     {
         case CLOCK_MODE:
-//            printf("reset to clock");
             a = (clock_values *) value_addr;
-            a->time = 0;
             a->bonus_time = 0;
             a->editable = False;
             break;
