@@ -414,18 +414,16 @@ void set_led(unsigned char binary_data) {
 
 void set_lcd_text(char * string)
 {
-//    unsigned char buffer[MAX_BUFF+1];
-//    int len = strlen(string);
-//    memset(buffer, ' ',MAX_BUFF);
-//    buffer[MAX_BUFF] = '\0';
-//
-//    if(len>0) {
-//        strncat(buffer,string,len);
-//        buffer[len] = ' ';
-//    }
-//
-//    write(fpga_lcd_device, buffer, MAX_BUFF);
-    write(fpga_lcd_device, string, MAX_BUFF);
+    unsigned char buffer[MAX_BUFF+1];
+    int len = strlen(string);
+
+    memset(buffer, ' ',MAX_BUFF+1);
+
+    if(len>0) {
+        strncat(buffer,string,len);
+    }
+
+    write(fpga_lcd_device, buffer, MAX_BUFF);
 }
 
 void clock_output() {
