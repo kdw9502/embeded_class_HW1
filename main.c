@@ -418,7 +418,6 @@ void set_lcd_text(char * string)
     int len = strlen(string);
     memset(buffer, ' ',MAX_BUFF);
     buffer[MAX_BUFF] = '\0';
-    printf("text output string: %s len %d\n", string,len);
 
     if(len>0) {
         strncat(buffer,string,len);
@@ -482,10 +481,13 @@ void counter_output() {
 
 void text_editor_output()
 {
+    char buffer[MAX_BUFF+1];
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
 
-    set_lcd_text(val->string);
+    strcpy(buffer, val->string);
+
+    set_lcd_text(buffer);
     set_fnd(val->count);
 }
 
