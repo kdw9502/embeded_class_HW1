@@ -316,7 +316,7 @@ void text_editor_process() {
         val->prev_value = -1;
     } else{
         // 일반 입력
-        for (int i=0;i<MAX_BUTTON; i++)
+        for (i=0;i<MAX_BUTTON; i++)
         {
             if(button_addr[i] == True)
             {
@@ -330,7 +330,7 @@ void text_editor_process() {
                     }
                     else{
                         val->editing_index ++;
-                        val->string[val->editing_index] = start_text_map[now_editing_char];
+                        val->string[val->editing_index] = start_text_map[i];
                         val->string[val->editing_index + 1] = '\0';
                     }
                     val->prev_value = i;
