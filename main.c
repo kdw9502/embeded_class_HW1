@@ -302,16 +302,20 @@ void text_editor_process() {
 
     if (button_addr[1] == True && button_addr[2] == True) {
         //초기화
+        printf("reset text\n");
         val->string[0] = '\0';
         val->prev_value = -1;
     } else if (button_addr[4] == True && button_addr[5] == True){
         // 입력모드 변경
         // swap 0, 1
+        printf("swap text mode\n");
         val->is_letter_mode = 1 - val->is_letter_mode;
         val->prev_value = -1;
     } else if (button_addr[7] == True && button_addr[8] == True){
         // 한칸 띄우기
+        printf("text spacing\n");
         val->string[val->editing_index] = ' ';
+        val->string[val->editing_index + 1] = '\0';
         val->editing_index++;
         val->prev_value = -1;
     } else{
@@ -322,6 +326,7 @@ void text_editor_process() {
             {
                 // 문자열 모드
                 if (val->is_letter_mode == True){
+                    printf("text %d pressed",i);
                     if(val->prev_value == i)
                     {
                         char now_editing_char = val->string[val->editing_index];
@@ -337,6 +342,7 @@ void text_editor_process() {
                 }
                 //숫자모드
                 else{
+                    printf("digit %d pressed",i);
                     val->prev_value = -1;
                     val->editing_index ++;
                     val->string[val->editing_index] = '0' + i + 1;
