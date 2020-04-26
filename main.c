@@ -297,7 +297,6 @@ void text_editor_process() {
     button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
     text_editor_values *val;
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
-    char temp;
     int i;
 
     if (button_addr[1] == True && button_addr[2] == True) {
