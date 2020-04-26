@@ -481,10 +481,14 @@ void counter_output() {
 
 void text_editor_output()
 {
+    printf("1\n");
     char buffer[MAX_BUFF+1];
     text_editor_values *val;
+    printf("2\n");
     val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
+    printf("3\n");
     strcpy(buffer, val->string);
+    printf("4\n");
     printf("text output string: %s len: %d editing: %d", val->string,strlen(val->string), val->editing_index);
 
     set_lcd_text(buffer);
