@@ -4,11 +4,11 @@ void input_process() {
     printf("init input process\n");
     if ((fpga_switch_device = open("/dev/fpga_push_switch", O_RDWR | O_NONBLOCK)) == -1) {
         printf("Switch Device Open Error\n");
-        return;
+//        return;
     }
     if ((hw_button_device = open("/dev/input/event0", O_RDONLY | O_NONBLOCK)) == -1) {
         printf("Hardware key Device Open Error\n");
-        return;
+//        return;
     }
     while (1) {
         read_hw_key(mode_mid);
@@ -20,6 +20,8 @@ void input_process() {
 void main_process() {
     printf("init main process\n");
     int *mode_addr;
+    text_editor_map_setting();
+
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
         if (mode_addr[0] >= MODE_CHANGED) {
@@ -60,6 +62,13 @@ void output_process() {
         printf("fnd disabled\n");
         return;
     }
+
+    if ((fpga_lcd_device = open("/dev/fpga_text_lcd", O_WRONLY)) == -1){
+        printf("lcd disabled\n");
+        return;
+    }
+
+
     while (1) {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
 //        printf("output mode : %d",mode_addr[0]);
@@ -71,12 +80,12 @@ void output_process() {
             case COUNTER_MODE:
                 counter_output();
                 break;
-//            case TEXT_MODE:
-//                text_editor_process();
-//                break;
-//            case DRAW_MODE:
-//                draw_board_process();
-//                break;
+            case TEXT_MODE:
+                text_editor_output();
+                break;
+            case DRAW_MODE:
+                draw_board_output();
+                break;
         }
         //shmdt(mode_addr);
         usleep(DELAY * 2);
@@ -84,7 +93,10 @@ void output_process() {
 }
 
 void reset_value(int mode) {
-    void *value_addr = (void *) shmat(value_mid, (void *) NULL, 0);
+    // reset memory to 0
+    unsigned char *value_addr = (unsigned char *) shmat(value_mid, (unsigned char *) NULL, 0);
+    memset(value_addr,0,1000);
+
     clock_values *a;
     counter_values *b;
     text_editor_values *c;
@@ -96,29 +108,26 @@ void reset_value(int mode) {
             a->time = 0;
             a->bonus_time = 0;
             a->editable = False;
-//            printf("time, bonus time %d %d\n",a->time, a->bonus_time);
             break;
         case COUNTER_MODE:
 //            printf("reset to counter");
             b = (counter_values *) value_addr;
             b->exponent = 10;
             b->value = 0;
-//            printf("exponent, value time %d %d\n", b->exponent, b->value);
             break;
         case TEXT_MODE:
             c = (text_editor_values *) value_addr;
             c->count = 0;
             c->is_letter_mode = True;
-            c->length = 0;
-            c->prev_value = 0;
-            c->string = (char *) malloc(sizeof(char *) * 8);
+            c->prev_value = -1;
             c->string[0] = '\0';
+            c->editing_index = 0;
             break;
         case DRAW_MODE:
             d = (draw_board_values *) value_addr;
             d->count = 0;
-            d->board = (char *) malloc(sizeof(char *) * 200);
             d->cursor_point = 0;
+            d->board[0] = '\0';
             break;
     }
     //shmdt(value_addr);
@@ -233,8 +242,121 @@ void counter_process() {
     //shmdt(counterValues);
 }
 
-void text_editor_process() {
 
+
+void text_editor_map_setting()
+{
+    start_text_map[0] = '.';
+    next_value_map['.'] = 'Q';
+    next_value_map['Q'] = 'Z';
+    next_value_map['Z'] = '.';
+
+    start_text_map[1] = 'A';
+    next_value_map['A'] = 'B';
+    next_value_map['B'] = 'C';
+    next_value_map['C'] = 'A';
+
+    start_text_map[2] = 'D';
+    next_value_map['D'] = 'E';
+    next_value_map['E'] = 'F';
+    next_value_map['F'] = 'D';
+
+    start_text_map[3] = 'G';
+    next_value_map['G'] = 'H';
+    next_value_map['H'] = 'I';
+    next_value_map['I'] = 'G';
+
+    start_text_map[4] = 'J';
+    next_value_map['J'] = 'K';
+    next_value_map['K'] = 'L';
+    next_value_map['L'] = 'J';
+
+    start_text_map[5] = 'M';
+    next_value_map['M'] = 'N';
+    next_value_map['N'] = 'O';
+    next_value_map['O'] = 'M';
+
+    start_text_map[6] = 'P';
+    next_value_map['P'] = 'R';
+    next_value_map['R'] = 'S';
+    next_value_map['S'] = 'P';
+
+    start_text_map[7] = 'T';
+    next_value_map['T'] = 'U';
+    next_value_map['U'] = 'V';
+    next_value_map['V'] = 'T';
+
+    start_text_map[8] = 'W';
+    next_value_map['W'] = 'X';
+    next_value_map['X'] = 'Y';
+    next_value_map['Y'] = 'W';
+}
+
+void text_editor_process() {
+    unsigned char *button_addr;
+    button_addr = (unsigned char *) shmat(button_mid, (unsigned char *) NULL, 0);
+    text_editor_values *val;
+    val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
+    char temp;
+
+    if (button_addr[1] == True && button_addr[2] == True) {
+        //초기화
+        val->string[0] = '\0';
+        val->prev_value = -1;
+    } else if (button_addr[4] == True && button_addr[5] == True){
+        // 입력모드 변경
+        // swap 0, 1
+        val->is_letter_mode = 1 - val->is_letter_mode;
+        val->prev_value = -1;
+    } else if (button_addr[7] == True && button_addr[8] == True){
+        // 한칸 띄우기
+        val->string[val->editing_index] = ' ';
+        val->editing_index++;
+        val->prev_value = -1;
+    } else{
+        // 일반 입력
+        for (int i=0;i<MAX_BUTTON; i++)
+        {
+            if(button_addr[i] == True)
+            {
+                // 문자열 모드
+                if (val->is_letter_mode == True){
+                    if(val->prev_value == i)
+                    {
+                        char now_editing_char = val->string[val->editing_index];
+                        val->string[val->editing_index] = next_value_map[now_editing_char];
+                        val->string[val->editing_index + 1] = '\0';
+                    }
+                    else{
+                        val->editing_index ++;
+                        val->string[val->editing_index] = start_text_map[now_editing_char];
+                        val->string[val->editing_index + 1] = '\0';
+                    }
+                    val->prev_value = i;
+                }
+                //숫자모드
+                else{
+                    val->prev_value = -1;
+                    val->editing_index ++;
+                    val->string[val->editing_index] = '0' + i + 1;
+                    val->string[val->editing_index + 1] = '\0';
+                }
+            }
+        }
+    }
+
+    // 입력 버튼만큼 카운트 증가
+    for (int i=0;i<MAX_BUTTON; i++)
+    {
+        val->count += button_addr[i];
+    }
+
+    // 입력 영역 초과시 한칸 앞으로
+    if (strlen(val->string) > MAX_BUFF)
+    {
+        strcpy(val->string, val->string + 1);
+        val->editing_index--;
+    }
 }
 
 void draw_board_process() {
@@ -329,6 +451,24 @@ void counter_output() {
         set_fnd(fnd_val);
     }
     //shmdt(values);
+}
+
+void text_editor_output()
+{
+    text_editor_values *val;
+    val = (text_editor_values *) shmat(value_mid, (text_editor_values *) NULL, 0);
+    char* str = val->string;
+    unsigned char buffer[MAX_BUFF];
+
+
+    int len = strlen(str);
+
+    if(str_size>0) {
+        strncat(buffer,str,len);
+        memset(buffer+len,' ',MAX_BUFF-len);
+    }
+
+    write(fpga_lcd_device,string,MAX_BUFF);
 }
 
 int main() {
