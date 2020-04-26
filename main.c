@@ -33,6 +33,13 @@ void main_process()
     while (1)
     {
         mode_addr = (int *) shmat(mode_mid, (int *) NULL, 0);
+        // 종료 입력시 프로그램 종료
+        if (mode_addr[0] == EXIT)
+        {
+            kill(input_process_pid,SIGTERM);
+            kill(output_process_pid,SIGTERM);
+            exit(0);
+        }
         // 모드가 변경되었을 때를 감지하여 초기값을 설정한다.
         if (mode_addr[0] >= MODE_CHANGED)
         {
@@ -248,7 +255,7 @@ void clock_process()
             settimeofday(&timeval, NULL);
             clockValues->bonus_time = 0;
         }
-        // 수정 모드가 아닐 경우 수정모드로 진입한다.
+            // 수정 모드가 아닐 경우 수정모드로 진입한다.
         else
         {
             clockValues->editable = True;
@@ -774,7 +781,8 @@ int main()
     mode_addr[0] = CLOCK_MODE + MODE_CHANGED;
     //shmdt(mode_addr);
 
-    switch (fork())
+    int pid;
+    switch ((pid = fork()))
     {
         case -1: //fail
             perror("fork");
@@ -784,7 +792,9 @@ int main()
             input_process();
             break;
         default: //parent
-            switch (fork())
+            // 추후 종료를 위한 pid 저장
+            input_process_pid = pid;
+            switch ((pid = fork()))
             {
                 case -1: //fail
                     perror("second fork");
@@ -794,6 +804,8 @@ int main()
                     output_process();
                     break;
                 default:
+                    // 추후 종료를 위한 pid 저장
+                    output_process_pid = pid;
                     main_process();
                     break;
             }
