@@ -67,13 +67,10 @@
 int button_mid, mode_mid, value_mid;
 
 void input_process();
-
 void main_process();
-
 void output_process();
 
 void read_hw_key();
-
 void read_fpga_key();
 
 int main();
@@ -117,18 +114,18 @@ typedef struct _draw_board_values {
 int int_to_four_digit(int value, int exponent);
 
 void set_fnd(int value);
-void set_lcd_text(char * string);
+void set_lcd_text(char *string);
+void set_dot_matrix(unsigned char *num_matrix);
+
 void clock_output();
-
 void counter_output();
-
 void text_editor_output();
-
 void draw_board_output();
 
 void text_editor_map_setting();
-char next_value_map[130] = {0, };
-char start_text_map[10] ={0,};
+
+char next_value_map[130] = {0,};
+char start_text_map[10] = {0,};
 
 int fpga_switch_device;
 int hw_button_device;
@@ -137,6 +134,6 @@ int fpga_led_mmap;
 int fpga_lcd_device;
 int fpga_dot_device;
 
-unsigned char empty_dot_matrix[10] ={0,};
+unsigned char empty_dot_matrix[10] = {0,};
 #define DEBUG
 #endif //EMBEDDED_MAIN_H
