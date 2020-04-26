@@ -135,5 +135,8 @@ int hw_button_device;
 int fpga_fnd_device;
 int fpga_led_mmap;
 int fpga_lcd_device;
+int fpga_dot_device;
+
+unsigned char empty_dot_matrix[10] ={0,};
 #define DEBUG
 #endif //EMBEDDED_MAIN_H
