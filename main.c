@@ -712,6 +712,7 @@ void text_editor_output()
         num_matrix[9] = 0b0111111;
     }
     set_dot_matrix(num_matrix);
+    set_led(0);
 }
 
 
@@ -757,7 +758,7 @@ void draw_board_output()
         }
     }
 
-
+    set_led(0);
     set_dot_matrix(num_matrix);
 }
 
