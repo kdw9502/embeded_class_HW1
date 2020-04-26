@@ -463,6 +463,7 @@ void text_editor_output()
 
 
     int len = strlen(str);
+    printf("text output string %s len %s", str,len);
 
     if(len>0) {
         strncat(buffer,str,len);
