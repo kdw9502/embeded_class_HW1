@@ -36,7 +36,9 @@ void main_process()
         // 종료 입력시 프로그램 종료
         if (mode_addr[0] == EXIT)
         {
-            raise(SIGTERM);
+            kill(input_process_pid,SIGTERM);
+            kill(output_process_pid,SIGTERM);
+            exit(0);
         }
         // 모드가 변경되었을 때를 감지하여 초기값을 설정한다.
         if (mode_addr[0] >= MODE_CHANGED)
