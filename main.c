@@ -422,7 +422,7 @@ void set_lcd_text(char * string)
         memset(buffer+len,' ',MAX_BUFF-len);
     }
 
-    write(fpga_lcd_device,val->string,MAX_BUFF);
+    write(fpga_lcd_device, string, MAX_BUFF);
 }
 
 void clock_output() {
